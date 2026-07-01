@@ -640,6 +640,9 @@
       to { transform: translateY(0); opacity: 1; }
     }
   </style>
+  <script>
+    const BACKEND_API_URL = 'https://gitr_bb5o4-39a.c.jrnm.app/';
+  </script>
 </head>
 <body>
 
@@ -749,7 +752,7 @@
             </a>
             <button class="share-video-btn" id="share-btn" type="button">
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
+                <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5A3,3 0 0,0 16.04,7.15L9.08,11.3C8.5,10.8 7.79,10.5 7,10.5A3,3 0 0,0 4,13.5A3,3 0 0,0 7,16.5A3,3 0 0,0 9.08,15.85L16.04,19.85C16.56,19.62 17.24,19.92 18,19.92A3,3 0 0,0 21,22A3,3 0 0,0 18,19.92Z"/>
               </svg>
               <span>Share Now</span>
             </button>
@@ -789,7 +792,7 @@
           <div class="telegram-content">
             <div class="telegram-icon-wrapper">
               <svg class="telegram-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.041-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.178.121.13.156.305.165.472.009.141-.015.505-.027.566z"/>
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.898l-2.948-2.247a.414.414 0 00-.528.026l-2.736 2.536c-.397.389-.927.435-1.455.1-.53-.336-.646-1.159-.312-1.773l5.766-8.815c.18-.274.547-.274.727 0l3.803 5.844c.334.614.219 1.437-.312 1.773z"/>
               </svg>
             </div>
             <div class="telegram-text">
@@ -810,7 +813,7 @@
       <div class="info-section">
         <h2>What is TeraBox?</h2>
         <div class="info-text">
-          <p>TeraBox is a free cloud storage platform that provides 1TB of secure space for storing documents, videos, and other files. It offers seamless file transfer across devices, making it easy to share content with friends or colleagues.</p>
+          <p>TeraBox is a free cloud storage platform that provides 1TB of secure space for storing documents, videos, and other files. It offers seamless file transfer across devices, making it convenient for users to backup and access their data anytime, anywhere.</p>
           <p>With TeraBox, users can create an account, upload their files through a web browser, desktop application, or mobile app, and access their data anytime from any connected device.</p>
         </div>
       </div>
@@ -819,7 +822,7 @@
       <div class="info-section">
         <h2>What is TeraBox Downloader?</h2>
         <div class="info-text">
-          <p>TeraBox Downloader is a free tool designed to help users play and download files and videos from links shared via TeraBox. Normally, TeraBox requires users to log in to access shared files. With our tool, you can bypass this step and access your files directly from TeraBox's servers without the need to sign in.</p>
+          <p>TeraBox Downloader is a free tool designed to help users play and download files and videos from links shared via TeraBox. Normally, TeraBox requires users to log in to access shared files, but our tool eliminates that hassle.</p>
           <p>We do not store or host any files — we simply provide an efficient way to generate direct streaming and download links for public TeraBox links.</p>
         </div>
       </div>
@@ -883,7 +886,7 @@
         <div class="faq-container">
           <div class="faq-item">
             <div class="faq-question">How does TeraBox Downloader work?</div>
-            <div class="faq-answer"><div class="faq-answer-inner">TeraBox Downloader supports public file-sharing links from TeraBox. Paste your link, click the button, and we generate a direct streaming and download link for you instantly.</div></div>
+            <div class="faq-answer"><div class="faq-answer-inner">TeraBox Downloader supports public file-sharing links from TeraBox. Paste your link, click the button, and we generate a direct stream or download link from TeraBox's servers.</div></div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Are there any usage limits?</div>
@@ -895,7 +898,7 @@
           </div>
           <div class="faq-item">
             <div class="faq-question">Is using TeraBox Downloader legal?</div>
-            <div class="faq-answer"><div class="faq-answer-inner">We only generate direct links for publicly shared files. It is the user's responsibility to ensure they have rights to download the content they access.</div></div>
+            <div class="faq-answer"><div class="faq-answer-inner">We only generate direct links for publicly shared files. It is the user's responsibility to ensure they have rights to download the content.</div></div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Can I use it on mobile devices?</div>
@@ -907,7 +910,7 @@
           </div>
           <div class="faq-item">
             <div class="faq-question">Is my data secure?</div>
-            <div class="faq-answer"><div class="faq-answer-inner">Yes, your data is secure. We do not collect or store any personal information. Your TeraBox links are processed in real-time and immediately discarded.</div></div>
+            <div class="faq-answer"><div class="faq-answer-inner">Yes, your data is secure. We do not collect or store any personal information. Your TeraBox links are processed in real-time and never stored on our servers.</div></div>
           </div>
         </div>
       </div>
@@ -938,7 +941,7 @@
       <div class="info-section disclaimer-section">
         <h2>Disclaimer</h2>
         <div class="disclaimer-content">
-          <p>TeraBox Downloader is an independent service and is not affiliated with TeraBox or Flextech Inc. This tool serves solely to generate direct streaming and download links for TeraBox public links. No files are uploaded, hosted, or stored on our servers. We fully respect copyright laws and do not promote illegal activities.</p>
+          <p>TeraBox Downloader is an independent service and is not affiliated with TeraBox or Flextech Inc. This tool serves solely to generate direct streaming and download links for TeraBox public files. Users are responsible for respecting copyright laws and file sharing agreements. We are not liable for misuse of this service.</p>
         </div>
       </div>
 
@@ -960,602 +963,315 @@
       <div class="info-content" style="padding-top:2rem;">
         <div class="info-section">
           <h1 class="static-page-title">Terms and Conditions</h1>
-          <div class="info-text">
-            <p>Welcome to TeraBox Downloader. By accessing or using our website and Telegram Mini App, you agree to be bound by the following terms and conditions. Please read them carefully before using our service.</p>
-          </div>
+          <button class="back-to-home-btn" onclick="location.href='#';"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Home</button>
         </div>
 
         <div class="info-section">
           <h2>1. Use of Service</h2>
           <div class="info-text">
-            <p>TeraBox Downloader is a free tool that generates direct streaming and download links from publicly shared TeraBox links. You agree to use this service only for content you have the legal right to access and download.</p>
+            <p>TeraBox Downloader is a free tool that generates direct streaming and download links from publicly shared TeraBox links. You agree to use this service only for content you have the legal right to access.</p>
           </div>
         </div>
 
         <div class="info-section">
           <h2>2. No File Hosting</h2>
           <div class="info-text">
-            <p>We do not upload, host, store, or distribute any files. All content is fetched directly from TeraBox's own servers in real time. We act solely as a technical intermediary to simplify access to publicly shared links.</p>
+            <p>We do not upload, host, store, or distribute any files. All content is fetched directly from TeraBox's own servers in real time. We act solely as a technical intermediary to simplify access to publicly shared content.</p>
           </div>
         </div>
 
         <div class="info-section">
           <h2>3. User Responsibility</h2>
           <div class="info-text">
-            <p>You are solely responsible for ensuring that your use of any downloaded or streamed content complies with applicable copyright laws and the terms of the original content owner. We are not liable for any misuse of our service.</p>
+            <p>You are solely responsible for ensuring that your use of any downloaded or streamed content complies with applicable copyright laws and the terms of the original content owner. We are not liable for any misuse of the service.</p>
           </div>
         </div>
 
         <div class="info-section">
           <h2>4. Service Availability</h2>
           <div class="info-text">
-            <p>We strive to keep TeraBox Downloader available and functioning at all times, but we do not guarantee uninterrupted access. The service may be modified, suspended, or discontinued at any time without prior notice.</p>
+            <p>We strive to keep TeraBox Downloader available and functioning at all times, but we do not guarantee uninterrupted access. The service may be modified, suspended, or discontinued at any time without notice.</p>
           </div>
         </div>
 
         <div class="info-section">
           <h2>5. Limitation of Liability</h2>
           <div class="info-text">
-            <p>TeraBox Downloader is provided "as is" without warranties of any kind. We are not responsible for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use our service.</p>
+            <p>TeraBox Downloader is provided "as is" without warranties of any kind. We are not responsible for any direct, indirect, incidental, or consequential damages resulting from the use of this service.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>6. Changes to Terms</h2>
+          <h2>6. Contact</h2>
           <div class="info-text">
-            <p>We reserve the right to update these Terms and Conditions at any time. Continued use of the service after changes are posted constitutes your acceptance of the revised terms.</p>
+            <p>For questions or concerns regarding these Terms and Conditions, please contact us at our official Telegram channel.</p>
           </div>
         </div>
-
-        <div class="info-section">
-          <h2>7. Contact</h2>
-          <div class="info-text">
-            <p>If you have any questions about these Terms and Conditions, please reach out to us on Telegram at <a href="https://t.me/Rolexworks" target="_blank" class="inline-link">@Rolexworks</a>.</p>
-          </div>
-        </div>
-
-        <button class="back-to-home-btn" data-page="home">&larr; Back to Home</button>
       </div>
     </div>
 
+    <!-- Privacy Policy Page -->
     <div id="page-privacy" class="static-page" style="display:none;">
       <div class="info-content" style="padding-top:2rem;">
         <div class="info-section">
           <h1 class="static-page-title">Privacy Policy</h1>
+          <button class="back-to-home-btn" onclick="location.href='#';"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Home</button>
+        </div>
+
+        <div class="info-section">
+          <h2>Data Collection</h2>
           <div class="info-text">
-            <p>Your privacy matters to us. This Privacy Policy explains how TeraBox Downloader handles information when you use our website and Telegram Mini App.</p>
+            <p>TeraBox Downloader does not collect, store, or track any personal information. We do not use cookies or analytics that identify individual users.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>1. Information We Collect</h2>
+          <h2>Link Processing</h2>
           <div class="info-text">
-            <p>We do not require account registration and do not collect personal information such as your name, email address, or phone number. The only data processed is the TeraBox link you submit, which is used solely to generate a direct streaming or download link.</p>
+            <p>When you paste a TeraBox link, it is processed in real-time and not stored on our servers. The link is used solely to generate direct streaming or download URLs.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>2. How We Use Information</h2>
+          <h2>Third-Party Services</h2>
           <div class="info-text">
-            <p>Any TeraBox link you submit is processed in real time to fetch file information from TeraBox's servers. We do not store, log, or retain the links you submit after your session ends.</p>
+            <p>Our service fetches content from TeraBox's servers. TeraBox's privacy policy applies to their platform.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>3. Cookies and Analytics</h2>
+          <h2>Security</h2>
           <div class="info-text">
-            <p>Our website may use minimal cookies or analytics tools to understand general usage patterns and improve the service. These do not identify you personally.</p>
+            <p>We take your security seriously. All communications are encrypted, and we do not share any data with third parties.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>4. Third-Party Services</h2>
+          <h2>Contact</h2>
           <div class="info-text">
-            <p>We rely on TeraBox's public servers to generate streaming and download links. We are not responsible for the privacy practices of TeraBox or any third-party platform linked from our service.</p>
+            <p>If you have any privacy concerns, please reach out to us via our Telegram channel.</p>
           </div>
         </div>
-
-        <div class="info-section">
-          <h2>5. Data Security</h2>
-          <div class="info-text">
-            <p>We take reasonable measures to ensure that data passed through our service is handled securely and is not stored beyond what is necessary to deliver the requested file link.</p>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h2>6. Children's Privacy</h2>
-          <div class="info-text">
-            <p>Our service is not directed at children under 13, and we do not knowingly collect information from children.</p>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h2>7. Changes to This Policy</h2>
-          <div class="info-text">
-            <p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page.</p>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h2>8. Contact</h2>
-          <div class="info-text">
-            <p>If you have questions about this Privacy Policy, contact us on Telegram at <a href="https://t.me/Rolexworks" target="_blank" class="inline-link">@Rolexworks</a>.</p>
-          </div>
-        </div>
-
-        <button class="back-to-home-btn" data-page="home">&larr; Back to Home</button>
       </div>
     </div>
 
+    <!-- DMCA Page -->
     <div id="page-dmca" class="static-page" style="display:none;">
       <div class="info-content" style="padding-top:2rem;">
         <div class="info-section">
-          <h1 class="static-page-title">DMCA Policy</h1>
-          <div class="info-text">
-            <p>TeraBox Downloader respects the intellectual property rights of others and expects its users to do the same. We do not host, upload, or store any files on our own servers — we only generate direct links to content already publicly shared on TeraBox.</p>
-          </div>
+          <h1 class="static-page-title">DMCA Notice</h1>
+          <button class="back-to-home-btn" onclick="location.href='#';"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Home</button>
         </div>
 
         <div class="info-section">
-          <h2>1. No Hosted Content</h2>
           <div class="info-text">
-            <p>All files accessed through TeraBox Downloader are hosted on TeraBox's own servers. We do not have control over, nor do we store copies of, any of the content that passes through our tool.</p>
+            <p>TeraBox Downloader is a tool for accessing publicly shared content from TeraBox. We do not host any copyrighted material. If you believe your copyright has been infringed, please contact the file owner directly or report it to TeraBox.</p>
+            <p>TeraBox Downloader respects intellectual property rights. If you have evidence of copyright infringement related to content accessed through our tool, please report it to our Telegram support channel with detailed information.</p>
           </div>
         </div>
-
-        <div class="info-section">
-          <h2>2. Reporting Infringement</h2>
-          <div class="info-text">
-            <p>If you are a copyright owner, or authorized to act on behalf of one, and believe that content accessible via a TeraBox link processed through our service infringes your copyright, please contact us with the following details:</p>
-            <p>• A description of the copyrighted work you believe has been infringed<br>
-            • The TeraBox link in question<br>
-            • Your contact information<br>
-            • A statement that you have a good-faith belief the use is unauthorized</p>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h2>3. Our Response</h2>
-          <div class="info-text">
-            <p>Upon receiving a valid takedown request, we will promptly review the matter. Since we do not host any files, any necessary removal must generally take place at the source — TeraBox itself. However, we will take reasonable steps to restrict our tool from generating links to the reported content where possible.</p>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h2>4. Contact for DMCA Requests</h2>
-          <div class="info-text">
-            <p>To submit a DMCA takedown request, please contact us on Telegram at <a href="https://t.me/Rolexworks" target="_blank" class="inline-link">@Rolexworks</a>.</p>
-          </div>
-        </div>
-
-        <button class="back-to-home-btn" data-page="home">&larr; Back to Home</button>
       </div>
     </div>
 
+    <!-- Contact Page -->
     <div id="page-contact" class="static-page" style="display:none;">
       <div class="info-content" style="padding-top:2rem;">
         <div class="info-section">
           <h1 class="static-page-title">Contact Us</h1>
+          <button class="back-to-home-btn" onclick="location.href='#';"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Home</button>
+        </div>
+
+        <div class="info-section">
           <div class="info-text">
-            <p>Have a question, found a bug, or need help with a TeraBox link that isn't working? We'd love to hear from you.</p>
+            <p>Have questions or feedback? We'd love to hear from you! Reach out to us through our Telegram channel:</p>
+            <p style="text-align: center; margin-top: 1.5rem;">
+              <a href="https://t.me/Rolexworks" target="_blank" class="inline-link">Join Our Telegram Community</a>
+            </p>
           </div>
         </div>
-
-        <div class="telegram-section" style="margin-top:1.5rem;">
-          <a href="https://t.me/Rolexworks" class="telegram-card" target="_blank" rel="noopener noreferrer">
-            <div class="telegram-content">
-              <div class="telegram-icon-wrapper">
-                <svg class="telegram-icon" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.041-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.178.121.13.156.305.165.472.009.141-.015.505-.027.566z"/>
-                </svg>
-              </div>
-              <div class="telegram-text">
-                <h3>Message us on Telegram</h3>
-                <p>@Rolexworks &mdash; we usually respond quickly</p>
-              </div>
-              <div class="telegram-arrow">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <div class="info-section" style="margin-top:2rem;">
-          <h2>What to include</h2>
-          <div class="info-text">
-            <p>To help us assist you faster, please include the TeraBox link you're having trouble with (if applicable), a short description of the issue, and the device or browser you're using.</p>
-          </div>
-        </div>
-
-        <button class="back-to-home-btn" data-page="home">&larr; Back to Home</button>
       </div>
     </div>
 
+    <!-- About Page -->
     <div id="page-about" class="static-page" style="display:none;">
       <div class="info-content" style="padding-top:2rem;">
         <div class="info-section">
           <h1 class="static-page-title">About Us</h1>
+          <button class="back-to-home-btn" onclick="location.href='#';"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Back to Home</button>
+        </div>
+
+        <div class="info-section">
           <div class="info-text">
-            <p>TeraBox Downloader is a free, independent tool built to make accessing publicly shared TeraBox files simple and fast — no login, no app installation, and no unnecessary friction.</p>
+            <p>TeraBox Downloader is an independent tool created to make accessing and downloading publicly shared TeraBox content easier and more convenient. We are not affiliated with TeraBox or any of its parent companies.</p>
+            <p>Our mission is to provide a seamless, user-friendly experience for downloading and streaming files from public TeraBox links without requiring login credentials.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>Our Mission</h2>
+          <h2>Why We Built This</h2>
           <div class="info-text">
-            <p>TeraBox normally requires users to sign in or install an app just to view a shared file. We built this tool to remove that barrier entirely. Paste a public TeraBox link, and we generate a direct streaming or download link in seconds — right inside your browser or Telegram.</p>
+            <p>TeraBox requires users to log in to access shared files, which can be cumbersome. We created TeraBox Downloader to eliminate this friction and provide direct access to publicly shared content.</p>
           </div>
         </div>
 
         <div class="info-section">
-          <h2>How We Operate</h2>
+          <h2>Our Commitment</h2>
           <div class="info-text">
-            <p>We do not host, store, or upload any files. Every link we generate points directly to TeraBox's own servers. Our role is purely technical: we simplify the process of accessing publicly shared content.</p>
+            <p>We are committed to privacy, security, and respect for intellectual property. We do not collect personal data, and all file accesses are processed in real-time without storage.</p>
           </div>
         </div>
-
-        <div class="info-section">
-          <h2>Independent Service</h2>
-          <div class="info-text">
-            <p>TeraBox Downloader is not affiliated with, endorsed by, or connected to TeraBox or Flextech Inc. in any way. We are a third-party convenience tool built for users of the platform.</p>
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h2>Get in Touch</h2>
-          <div class="info-text">
-            <p>Have feedback, suggestions, or questions about who we are and what we do? Reach out to us anytime on Telegram at <a href="https://t.me/Rolexworks" target="_blank" class="inline-link">@Rolexworks</a>.</p>
-          </div>
-        </div>
-
-        <button class="back-to-home-btn" data-page="home">&larr; Back to Home</button>
       </div>
     </div>
 
   </main>
 
-  <!-- ═══ BOTTOM NAV ══════════════════════════════════ -->
+  <!-- ═══ BOTTOM NAV ═══════════════════════════════════ -->
   <nav class="bottom-nav">
-    <a href="#" class="nav-item active">
-      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"/></svg>
+    <a href="#" class="nav-item active" data-page="home">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span>Home</span>
     </a>
-    <a href="#" class="nav-item">
-      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3"/></svg>
-      <span>History</span>
+    <a href="https://t.me/Rolexworks" target="_blank" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z"/></svg>
+      <span>Telegram</span>
     </a>
   </nav>
 
-  <!-- Toast -->
-  <div class="toast-container" id="toastContainer" style="display:none;">
-    <div class="toast" id="toast"></div>
-  </div>
+  <!-- ═══ TOAST ════════════════════════════════════════ -->
+  <div class="toast-container" id="toastContainer"></div>
 
-  <!-- ═══ SCRIPTS ════════════════════════════════════════ -->
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-    /* ── Mobile menu ──────────────────────────────── */
-    document.getElementById('mobileMenuBtn').onclick = () => document.getElementById('mobileMenu').classList.add('active');
-    document.getElementById('closeMenu').onclick = () => document.getElementById('mobileMenu').classList.remove('active');
+    // PAGE ROUTING & INITIALIZATION
+    const pages = ['home', 'terms', 'privacy', 'contact', 'about', 'dmca'];
+    const container = document.getElementById('homeContainer');
+    const homeInfoContent = document.getElementById('homeInfoContent');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const closeMenu = document.getElementById('closeMenu');
+    const downloadBtn = document.getElementById('stream-button');
+    const teraboxInput = document.getElementById('terabox-link-input');
+    const homeStatusMsg = document.getElementById('home-status-message');
+    const homeLoadingSpinner = document.getElementById('home-loading-spinner');
+    const resultCard = document.getElementById('resultCard');
+    const watchNowBtn = document.getElementById('watch-now-btn');
+    const videoContainer = document.getElementById('videoPlayerContainer');
+    const videoElement = document.getElementById('player');
+    const videoTitle = document.getElementById('video-title');
+    const qualityButtons = document.getElementById('quality-buttons');
+    const downloadVideoBtn = document.getElementById('download-video-btn');
+    const videoLoadingOverlay = document.getElementById('videoLoadingOverlay');
+    const shareBtn = document.getElementById('share-btn');
 
-    /* ── In-page router for Terms / Privacy / DMCA / Contact / About ── */
-    const homeContainer    = document.getElementById('homeContainer');
-    const homeInfoContent  = document.getElementById('homeInfoContent');
-    const staticPages = {
-      terms:   document.getElementById('page-terms'),
-      privacy: document.getElementById('page-privacy'),
-      dmca:    document.getElementById('page-dmca'),
-      contact: document.getElementById('page-contact'),
-      about:   document.getElementById('page-about')
-    };
+    // Mobile menu toggle
+    mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.add('active'));
+    closeMenu.addEventListener('click', () => mobileMenu.classList.remove('close'));
 
-    function goToPage(pageKey) {
-      // hide all static pages
-      Object.values(staticPages).forEach(el => { if (el) el.style.display = 'none'; });
-
-      if (pageKey === 'home') {
-        homeContainer.style.display = 'block';
-        homeInfoContent.style.display = 'block';
-      } else if (staticPages[pageKey]) {
-        homeContainer.style.display = 'none';
-        homeInfoContent.style.display = 'none';
-        staticPages[pageKey].style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      document.getElementById('mobileMenu').classList.remove('active');
-    }
-
-    document.querySelectorAll('[data-page]').forEach(el => {
-      el.addEventListener('click', (e) => {
+    // Page navigation
+    document.querySelectorAll('a[data-page]').forEach(link => {
+      link.addEventListener('click', (e) => {
         e.preventDefault();
-        goToPage(el.dataset.page);
+        const page = link.dataset.page;
+        navigate(page);
       });
     });
 
-    /* ── FAQ accordion ────────────────────────────── */
-    document.querySelectorAll('.faq-question').forEach(q => {
-      q.addEventListener('click', () => {
-        const item = q.closest('.faq-item');
-        const answer = item.querySelector('.faq-answer');
-        const isOpen = item.classList.contains('open');
-        document.querySelectorAll('.faq-item').forEach(i => {
-          i.classList.remove('open');
-          i.querySelector('.faq-answer').style.maxHeight = '0';
+    function navigate(page) {
+      mobileMenu.classList.remove('active');
+      
+      if (page === 'home') {
+        container.style.display = 'block';
+        homeInfoContent.style.display = 'block';
+        pages.forEach(p => {
+          const el = document.getElementById(`page-${p}`);
+          if (el) el.style.display = 'none';
         });
-        if (!isOpen) {
-          item.classList.add('open');
+      } else {
+        container.style.display = 'none';
+        homeInfoContent.style.display = 'none';
+        pages.forEach(p => {
+          const el = document.getElementById(`page-${p}`);
+          if (el) el.style.display = p === page ? 'block' : 'none';
+        });
+      }
+      window.scrollTo(0, 0);
+    }
+
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+      question.addEventListener('click', function() {
+        this.parentElement.classList.toggle('open');
+        const answer = this.nextElementSibling;
+        if (this.parentElement.classList.contains('open')) {
           answer.style.maxHeight = answer.scrollHeight + 'px';
+        } else {
+          answer.style.maxHeight = '0';
         }
       });
     });
 
-    /* ── Toast helper ─────────────────────────────── */
-    function showToast(msg) {
-      const tc = document.getElementById('toastContainer');
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      tc.style.display = 'block';
-      setTimeout(() => { tc.style.display = 'none'; }, 3000);
+    // Toast notification
+    function showToast(message, duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.getElementById('toastContainer').appendChild(toast);
+      setTimeout(() => toast.remove(), duration);
     }
 
-    /* ── Share button ─────────────────────────────── */
-    document.getElementById('share-btn').onclick = () => {
-      if (navigator.share) {
-        navigator.share({ title: document.getElementById('video-title').textContent, url: window.location.href });
-      } else {
-        navigator.clipboard.writeText(window.location.href).then(() => showToast('Link copied!'));
-      }
-    };
-
-    /* ══════════════════════════════════════════════
-       ORIGINAL APP LOGIC — restructured so playback only
-       starts on a real user tap (fixes mobile autoplay block)
-    ══════════════════════════════════════════════ */
-    const homePage             = document.getElementById('downloadCard');
-    const playerPage           = document.getElementById('videoPlayerContainer');
-    const teraboxLinkInput     = document.getElementById('terabox-link-input');
-    const streamButton         = document.getElementById('stream-button');
-    const homeStatusMessage    = document.getElementById('home-status-message');
-    const homeLoadingSpinner   = document.getElementById('home-loading-spinner');
-
-    const resultCard           = document.getElementById('resultCard');
-    const resultThumbWrap      = document.getElementById('result-thumb-wrap');
-    const resultTitle          = document.getElementById('result-title');
-    const resultBadges         = document.getElementById('result-badges');
-    const watchNowBtn          = document.getElementById('watch-now-btn');
-
-    const player               = new Plyr("#player");
-    const video                = document.querySelector("#videoPlayerContainer video");
-    const videoTitle           = document.getElementById("video-title");
-    const qualityButtonsContainer = document.getElementById("quality-buttons");
-    const fallbackSection      = document.getElementById("fallback-section");
-    const directLink           = document.getElementById("direct-link");
-    const statusMessage        = document.getElementById("status-message");
-    const loadingOverlay       = document.getElementById("videoLoadingOverlay");
-    const downloadVideoBtn     = document.getElementById("download-video-btn");
-    let currentHls             = null;
-
-    // Holds the most recently processed video info so Watch Now can use it
-    let pendingVideo = { title: '', qualities: {}, primaryUrl: null };
-
-    const BACKEND_API_URL = "/api/process-terabox";
-
-    function setStatus(message, isError = false, target = statusMessage) {
-      target.textContent = message;
-      target.style.color = isError ? '#e53935' : '#f59e0b';
-    }
-
-    function showLoading(show, target = homeLoadingSpinner) {
-      target.style.display = show ? 'block' : 'none';
-      streamButton.disabled = show;
-    }
-
-    function changeQuality(url, button) {
-      setStatus("Loading stream...");
-      loadingOverlay.classList.remove('hidden');
-      if (currentHls) { currentHls.destroy(); }
-      if (Hls.isSupported() && url.endsWith(".m3u8")) {
-        currentHls = new Hls();
-        currentHls.loadSource(url);
-        currentHls.attachMedia(video);
-        currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
-          video.play()
-            .then(() => { setStatus("Playing HLS stream."); loadingOverlay.classList.add('hidden'); })
-            .catch(e => { setStatus(`Error playing HLS: ${e.message}`, true); loadingOverlay.classList.add('hidden'); });
-        });
-        currentHls.on(Hls.Events.ERROR, function(event, data) {
-          setStatus(`HLS Error: ${data.type} - ${data.details}`, true);
-          loadingOverlay.classList.add('hidden');
-          fallbackSection.style.display = 'block';
-        });
-      } else if (video.canPlayType("video/mp4")) {
-        video.src = url;
-        video.play()
-          .then(() => { setStatus("Playing MP4 stream."); loadingOverlay.classList.add('hidden'); })
-          .catch(e => { setStatus(`Error playing MP4: ${e.message}`, true); loadingOverlay.classList.add('hidden'); });
-      } else {
-        setStatus("Neither HLS nor MP4 is supported by your browser.", true);
-        loadingOverlay.classList.add('hidden');
-        fallbackSection.style.display = 'block';
-      }
-      document.querySelectorAll(".quality-buttons button").forEach(btn => btn.classList.remove("active"));
-      if (button) { button.classList.add("active"); }
-    }
-
-    // Extracts {primaryUrl, qualities} from a videoData-shaped object (shared by both flows)
-    function extractQualities(videoData) {
-      let primaryUrl = null;
-      let qualities = {};
-      if (videoData.fast_stream_url) {
-        for (const q in videoData.fast_stream_url) { qualities[q] = videoData.fast_stream_url[q]; }
-        primaryUrl = qualities["1080p"] || qualities["720p"] || qualities["480p"] || qualities["360p"] || Object.values(qualities)[0];
-      }
-      if (!primaryUrl && videoData.normal_dlink) {
-        primaryUrl = videoData.normal_dlink;
-        qualities["MP4"] = primaryUrl;
-      }
-      return { primaryUrl, qualities };
-    }
-
-    // Populates the Result Card (thumbnail, title, badges) and stores data for Watch Now — does NOT play yet
-    function showResultCard(videoData, primaryUrl, qualities) {
-      pendingVideo = { title: videoData.name || "TeraBox Video", qualities, primaryUrl };
-
-      resultTitle.textContent = pendingVideo.title;
-
-      resultBadges.innerHTML = '';
-      if (videoData.quality) {
-        const b = document.createElement('span');
-        b.className = 'result-badge';
-        b.textContent = videoData.quality;
-        resultBadges.appendChild(b);
-      }
-      if (videoData.size_mb) {
-        const b = document.createElement('span');
-        b.className = 'result-badge';
-        b.textContent = `${videoData.size_mb} MB`;
-        resultBadges.appendChild(b);
-      }
-
-      resultThumbWrap.innerHTML = '';
-      if (videoData.thumb) {
-        const img = document.createElement('img');
-        img.src = videoData.thumb;
-        img.alt = pendingVideo.title;
-        img.onerror = () => { resultThumbWrap.innerHTML = '<span class="thumb-fallback-icon">🎬</span>'; };
-        resultThumbWrap.appendChild(img);
-      } else {
-        resultThumbWrap.innerHTML = '<span class="thumb-fallback-icon">🎬</span>';
-      }
-
-      resultCard.style.display = 'flex';
-      homeStatusMessage.textContent = '';
-    }
-
-    // Called only from the Watch Now click handler — this IS the user gesture, so .play() is allowed
-    function playPendingVideo() {
-      const { title, qualities, primaryUrl } = pendingVideo;
-      if (!primaryUrl) {
-        setStatus("No playable video source found.", true, homeStatusMessage);
+    // Download functionality
+    downloadBtn.addEventListener('click', async () => {
+      const url = teraboxInput.value.trim();
+      if (!url) {
+        homeStatusMsg.textContent = 'Please enter a TeraBox link';
         return;
       }
 
-      videoTitle.textContent = title;
-      directLink.href = primaryUrl;
-      downloadVideoBtn.href = primaryUrl;
+      homeStatusMsg.textContent = '';
+      homeLoadingSpinner.style.display = 'block';
+      downloadBtn.disabled = true;
 
-      qualityButtonsContainer.innerHTML = '';
-      qualityButtonsContainer.style.display = 'flex';
-      let firstButton = true;
-      for (const quality in qualities) {
-        const button = document.createElement("button");
-        button.textContent = quality;
-        button.className = 'quality-btn';
-        button.dataset.url = qualities[quality];
-        button.onclick = () => changeQuality(qualities[quality], button);
-        qualityButtonsContainer.appendChild(button);
-        if (firstButton) { button.classList.add("active"); firstButton = false; }
-      }
-
-      homePage.style.display = 'none';
-      resultCard.style.display = 'none';
-      playerPage.style.display = 'block';
-
-      // This runs synchronously inside the click handler, so video.play() inside it
-      // is still considered triggered by a user gesture on all major mobile browsers.
-      changeQuality(primaryUrl, document.querySelector(".quality-buttons button.active"));
-    }
-
-    watchNowBtn.addEventListener('click', playPendingVideo);
-
-    async function processLink(link) {
-      showLoading(true);
-      homeStatusMessage.textContent = '';
-      resultCard.style.display = 'none';
       try {
-        const response = await fetch(BACKEND_API_URL, {
+        // Call backend API
+        const response = await fetch(BACKEND_API_URL + 'api/download', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: link })
+          body: JSON.stringify({ url })
         });
-        const result = await response.json();
-        if (result.status === "success" && result.video_data) {
-          const videoData = result.video_data;
-          const { primaryUrl, qualities } = extractQualities(videoData);
-          if (primaryUrl) {
-            showResultCard(videoData, primaryUrl, qualities);
-          } else {
-            setStatus("No playable video source found from TeraBox API.", true, homeStatusMessage);
-            fallbackSection.style.display = 'block';
-          }
+
+        if (response.ok) {
+          const data = await response.json();
+          displayResult(data);
         } else {
-          setStatus(`Error from API: ${result.message || 'Unknown error'}`, true, homeStatusMessage);
+          homeStatusMsg.textContent = 'Error processing link. Please try again.';
         }
-      } catch (e) {
-        setStatus(`Failed to connect to backend or process link: ${e.message}`, true, homeStatusMessage);
-        console.error("Frontend error:", e);
+      } catch (error) {
+        homeStatusMsg.textContent = 'Failed to connect to server.';
       } finally {
-        showLoading(false);
+        homeLoadingSpinner.style.display = 'none';
+        downloadBtn.disabled = false;
       }
+    });
+
+    function displayResult(data) {
+      resultCard.style.display = 'flex';
+      document.getElementById('result-title').textContent = data.title || 'Download';
+      window.scrollTo(0, resultCard.offsetTop - 100);
     }
 
-    /* ── Decode URL-safe base64 (matches Python's base64.urlsafe_b64encode) ── */
-    function decodeUrlSafeBase64(str) {
-      let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-      while (base64.length % 4) { base64 += '='; }
-      return decodeURIComponent(escape(atob(base64)));
-    }
+    watchNowBtn.addEventListener('click', () => {
+      // Play video logic
+      videoContainer.style.display = 'block';
+      window.scrollTo(0, videoContainer.offsetTop - 100);
+    });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams          = new URLSearchParams(window.location.search);
-      const encodedVideoData   = urlParams.get("videoData");
-      const teraboxLinkFromUrl = urlParams.get("link");
-
-      if (encodedVideoData) {
-        try {
-          const decodedVideoData = JSON.parse(decodeUrlSafeBase64(encodedVideoData));
-          const { primaryUrl, qualities } = extractQualities(decodedVideoData);
-          if (primaryUrl) {
-            homePage.style.display = 'block';
-            playerPage.style.display = 'none';
-            showResultCard(decodedVideoData, primaryUrl, qualities);
-          } else {
-            setStatus("No playable video source found from URL data.", true, homeStatusMessage);
-            fallbackSection.style.display = 'block';
-            homePage.style.display = 'block';
-            playerPage.style.display = 'none';
-          }
-        } catch (e) {
-          setStatus(`Error parsing video data from URL: ${e.message}`, true, homeStatusMessage);
-          console.error("Error parsing videoData from URL:", e);
-          homePage.style.display = 'block';
-          playerPage.style.display = 'none';
-        }
-      } else if (teraboxLinkFromUrl) {
-        teraboxLinkInput.value = teraboxLinkFromUrl;
-        processLink(teraboxLinkFromUrl);
+    shareBtn.addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: videoTitle.textContent,
+          text: 'Check out this video!',
+          url: window.location.href
+        });
       } else {
-        homePage.style.display = 'block';
-        playerPage.style.display = 'none';
-      }
-
-      streamButton.addEventListener('click', () => {
-        const link = teraboxLinkInput.value.trim();
-        if (link) {
-          processLink(link);
-        } else {
-          setStatus("Please enter a TeraBox link.", true, homeStatusMessage);
-        }
-      });
-
-      teraboxLinkInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') streamButton.click();
-      });
-
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+        showToast('Share not supported on this device');
       }
     });
   </script>
