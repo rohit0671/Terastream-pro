@@ -4,30 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeraBox Video Player</title>
-    <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #e8eaff 0%, #ffe5f9 100%);
-            min-height: 100vh;
-            padding-bottom: 80px;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f5f5;
+            color: #333;
         }
-        .container { max-width: 800px; margin: 0 auto; padding: 1rem; }
-        
+
         /* HOME PAGE */
-        #homePage { display: none; }
-        .download-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+        #homePage {
+            display: block;
+            padding: 1rem;
+            max-width: 100%;
         }
-        .title { font-size: 1.8rem; margin-bottom: 0.5rem; color: #000; }
-        .description { color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; }
-        .input-group { display: flex; gap: 0.5rem; }
+
+        .paste-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
         .terabox-input {
             flex: 1;
             padding: 0.75rem 1rem;
@@ -36,413 +43,363 @@
             font-size: 1rem;
             outline: none;
         }
-        .terabox-input:focus { border-color: #000; }
-        .download-btn {
+
+        .terabox-input:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+
+        .stream-btn {
             padding: 0.75rem 1.5rem;
-            background: #000;
+            background: #2196F3;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.95rem;
             font-weight: 600;
             white-space: nowrap;
         }
-        .download-btn:hover { background: #333; }
-        .download-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .home-error { color: #e53935; font-size: 0.875rem; margin-top: 0.75rem; min-height: 20px; }
+
+        .stream-btn:hover {
+            background: #1976D2;
+        }
+
+        .stream-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            min-height: 20px;
+            color: #f59e0b;
+        }
+
+        .status-message.error {
+            color: #e53935;
+        }
+
         .loading-spinner {
             display: none;
-            width: 22px; height: 22px;
-            border: 3px solid rgba(0,0,0,0.1);
-            border-top-color: #000;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(33, 150, 243, 0.2);
+            border-top-color: #2196F3;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 12px auto 0;
+            margin-top: 0.75rem;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         /* RESULT CARD */
-        .result-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.25rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+        #resultCard {
             display: none;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #resultCard.show {
+            display: block;
+        }
+
+        .result-container {
+            display: flex;
             gap: 1rem;
             align-items: flex-start;
         }
-        .result-card.show { display: flex; }
-        .result-thumb-wrap {
-            width: 96px; height: 96px;
+
+        .result-thumb {
+            width: 80px;
+            height: 80px;
             flex-shrink: 0;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #f8f9ff;
+            border-radius: 6px;
+            background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
-        .result-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .result-details { flex: 1; }
+
+        .result-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
         .result-title {
             font-size: 1rem;
             font-weight: 700;
             color: #000;
             margin-bottom: 0.5rem;
-            word-break: break-word;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            word-break: break-word;
         }
-        .result-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.85rem; }
+
+        .result-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
         .result-badge {
             font-size: 0.75rem;
-            font-weight: 700;
+            padding: 3px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
             color: #666;
-            background: #f8f9ff;
-            padding: 3px 10px;
-            border-radius: 100px;
-            border: 1px solid #eee;
         }
+
         .watch-now-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.6rem 1.3rem;
-            background: linear-gradient(45deg, #2196F3, #00bcd4);
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, #2196F3, #00bcd4);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
+            border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 3px 10px rgba(33,150,243,0.25);
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
         }
-        .watch-now-btn:hover { transform: translateY(-1px); }
+
+        .watch-now-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
 
         /* PLAYER PAGE */
-        #playerPage { display: none; }
-        .player-container {
-            background: white;
-            border-radius: 12px;
+        #playerPage {
+            display: none;
+            padding: 1rem;
+        }
+
+        .player-wrapper {
+            background: #000;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .video-wrapper { position: relative; padding-top: 56.25%; background: #000; }
-        .video-wrapper video {
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background: #000;
+        }
+
+        video {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
-        .video-info { padding: 1.25rem 1.5rem; }
-        .video-title-text {
+
+        .player-info {
+            background: white;
+            padding: 1rem;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .video-title {
             font-size: 1.1rem;
             font-weight: 700;
             color: #000;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             word-break: break-word;
         }
+
         .quality-buttons {
             display: flex;
+            gap: 0.5rem;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
+
         .quality-btn {
-            padding: 6px 16px;
-            border: 1.5px solid #ddd;
-            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
             background: white;
-            color: #666;
+            border-radius: 4px;
+            cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
-            cursor: pointer;
             transition: all 0.2s;
         }
-        .quality-btn:hover { border-color: #000; color: #000; }
-        .quality-btn.active { background: #000; color: white; border-color: #000; }
-        #status-message {
+
+        .quality-btn:hover {
+            border-color: #2196F3;
+            color: #2196F3;
+        }
+
+        .quality-btn.active {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+
+        .player-status {
             font-size: 0.85rem;
             color: #f59e0b;
             margin-bottom: 0.75rem;
             min-height: 18px;
         }
-        .video-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-        .download-video-btn {
-            flex: 1;
-            min-width: 160px;
-            padding: 0.875rem 1.5rem;
-            background: linear-gradient(45deg, #2196F3, #00bcd4);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            font-weight: 700;
-            font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(33,150,243,0.2);
-            text-decoration: none;
-        }
-        .download-video-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(33,150,243,0.3); }
-        .share-video-btn {
-            padding: 0.875rem 1.5rem;
-            background: white;
-            color: #000;
-            border: 1.5px solid #ddd;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
+
+        .download-btn {
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
         }
-        .share-video-btn:hover { border-color: #000; background: #f8f8f8; }
+
+        .download-btn:hover {
+            background: #1976D2;
+        }
+
         .fallback-link {
-            text-align: center;
             margin-top: 1rem;
             font-size: 0.875rem;
             color: #666;
+            display: none;
         }
-        .fallback-link a { color: #2196F3; font-weight: 700; text-decoration: none; }
-        .fallback-link a:hover { text-decoration: underline; }
 
-        @media (max-width: 768px) {
-            .input-group { flex-direction: column; }
-            .download-btn { width: 100%; }
+        .fallback-link a {
+            color: #2196F3;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .fallback-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+
+            .stream-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <!-- HOME PAGE -->
-    <div id="homePage" class="container">
-        <div class="download-card">
-            <h1 class="title">TeraBox Video Player</h1>
-            <p class="description">Paste a TeraBox link below to stream or download the video instantly.</p>
+    <div id="homePage">
+        <div class="paste-section">
             <div class="input-group">
-                <input type="text" id="terabox-link-input" class="terabox-input" placeholder="Paste your TeraBox link here" autocomplete="off">
-                <button id="stream-button" class="download-btn">Stream Now</button>
+                <input type="text" id="terabox-input" class="terabox-input" placeholder="Paste TeraBox link here" autocomplete="off">
+                <button id="stream-btn" class="stream-btn">Stream</button>
             </div>
-            <div class="home-error" id="home-status-message"></div>
-            <div class="loading-spinner" id="home-loading-spinner"></div>
+            <div class="status-message" id="home-status"></div>
+            <div class="loading-spinner" id="home-spinner"></div>
         </div>
 
-        <div id="resultCard" class="result-card">
-            <div class="result-thumb-wrap" id="result-thumb-wrap">
-                <span style="font-size: 2rem;">🎬</span>
-            </div>
-            <div class="result-details">
-                <div class="result-title" id="result-title">Video Title</div>
-                <div class="result-badges" id="result-badges"></div>
-                <button id="watch-now-btn" class="watch-now-btn">
-                    <span>▶</span> Watch Now
-                </button>
+        <div id="resultCard">
+            <div class="result-container">
+                <div class="result-thumb" id="result-thumb">
+                    <span style="font-size: 2rem;">🎬</span>
+                </div>
+                <div class="result-info">
+                    <div class="result-title" id="result-title">Video Title</div>
+                    <div class="result-meta" id="result-meta"></div>
+                    <button id="watch-now-btn" class="watch-now-btn">▶ Watch Now</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- PLAYER PAGE -->
-    <div id="playerPage" class="container">
-        <div class="player-container">
-            <div class="video-wrapper">
-                <video id="player" controls playsinline crossorigin="anonymous"></video>
+    <div id="playerPage">
+        <div class="player-wrapper">
+            <div class="video-container">
+                <video id="video" controls playsinline crossorigin="anonymous"></video>
             </div>
-            <div class="video-info">
-                <div class="video-title-text" id="video-title">Video Title</div>
-                <div id="status-message"></div>
+            <div class="player-info">
+                <div class="video-title" id="player-title">Video Title</div>
+                <div class="player-status" id="player-status"></div>
                 <div class="quality-buttons" id="quality-buttons"></div>
-                <div class="video-buttons">
-                    <a id="download-video-btn" class="download-video-btn" download>
-                        ⬇ Download
-                    </a>
-                    <button id="share-btn" class="share-video-btn">
-                        🔗 Share
-                    </button>
-                </div>
-                <div id="fallback-section" class="fallback-link" style="display:none;">
-                    <p>If the video doesn't play, try opening it directly:</p>
-                    <a id="direct-link" href="#" target="_blank">Open Video in Browser</a>
+                <a id="download-link" class="download-btn" download>⬇ Download</a>
+                <div id="fallback-section" class="fallback-link">
+                    <p>If video doesn't play:</p>
+                    <a id="direct-link" href="#" target="_blank">Open in Browser</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- AdSgram Ad Container -->
+    <div id="adsgram-container"></div>
+
     <script>
-        // Elements
+        // ===== CONFIGURATION =====
+        const BACKEND_API_URL = "https://c69.justrunmy.app/api/terabox";
+        const ADSGRAM_BLOCK_ID = "int-37243";
+
+        // ===== DOM ELEMENTS =====
         const homePage = document.getElementById('homePage');
         const playerPage = document.getElementById('playerPage');
-        const teraboxLinkInput = document.getElementById('terabox-link-input');
-        const streamButton = document.getElementById('stream-button');
-        const homeStatusMessage = document.getElementById('home-status-message');
-        const homeLoadingSpinner = document.getElementById('home-loading-spinner');
+        const teraboxInput = document.getElementById('terabox-input');
+        const streamBtn = document.getElementById('stream-btn');
+        const homeStatus = document.getElementById('home-status');
+        const homeSpinner = document.getElementById('home-spinner');
         const resultCard = document.getElementById('resultCard');
-        const resultThumbWrap = document.getElementById('result-thumb-wrap');
+        const resultThumb = document.getElementById('result-thumb');
         const resultTitle = document.getElementById('result-title');
-        const resultBadges = document.getElementById('result-badges');
+        const resultMeta = document.getElementById('result-meta');
         const watchNowBtn = document.getElementById('watch-now-btn');
 
-        const player = new Plyr("#player");
-        const video = document.querySelector("#player");
-        const videoTitle = document.getElementById("video-title");
-        const qualityButtonsContainer = document.getElementById("quality-buttons");
-        const fallbackSection = document.getElementById("fallback-section");
-        const directLink = document.getElementById("direct-link");
-        const statusMessage = document.getElementById("status-message");
-        const downloadVideoBtn = document.getElementById("download-video-btn");
-        const shareBtn = document.getElementById("share-btn");
-        let currentHls = null;
+        const video = document.getElementById('video');
+        const playerTitle = document.getElementById('player-title');
+        const playerStatus = document.getElementById('player-status');
+        const qualityButtons = document.getElementById('quality-buttons');
+        const downloadLink = document.getElementById('download-link');
+        const directLink = document.getElementById('direct-link');
+        const fallbackSection = document.getElementById('fallback-section');
 
-        // Store pending video data
+        let currentHls = null;
         let pendingVideo = { title: '', qualities: {}, primaryUrl: null };
 
-        const BACKEND_API_URL = "https://c69.justrunmy.app/api/terabox";
-
-        function setStatus(message, isError = false, target = statusMessage) {
-            target.textContent = message;
-            target.style.color = isError ? '#e53935' : '#f59e0b';
+        // ===== UTILITY FUNCTIONS =====
+        function setStatus(msg, isError = false, target = homeStatus) {
+            target.textContent = msg;
+            target.classList.toggle('error', isError);
         }
 
-        function showLoading(show) {
-            homeLoadingSpinner.style.display = show ? 'block' : 'none';
-            streamButton.disabled = show;
+        function showSpinner(show) {
+            homeSpinner.style.display = show ? 'block' : 'none';
+            streamBtn.disabled = show;
         }
 
-        function changeQuality(url, button) {
-            setStatus("Loading stream...");
-            if (currentHls) { currentHls.destroy(); }
-            
-            if (Hls.isSupported() && url.endsWith(".m3u8")) {
-                currentHls = new Hls();
-                currentHls.loadSource(url);
-                currentHls.attachMedia(video);
-                currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play()
-                        .then(() => { setStatus("Playing HLS stream."); })
-                        .catch(e => { setStatus(`Error playing HLS: ${e.message}`, true); });
-                });
-                currentHls.on(Hls.Events.ERROR, function(event, data) {
-                    setStatus(`HLS Error: ${data.type}`, true);
-                    fallbackSection.style.display = 'block';
-                });
-            } else if (video.canPlayType("video/mp4")) {
-                video.src = url;
-                video.play()
-                    .then(() => { setStatus("Playing MP4 stream."); })
-                    .catch(e => { setStatus(`Error playing MP4: ${e.message}`, true); });
-            } else {
-                setStatus("Neither HLS nor MP4 is supported by your browser.", true);
-                fallbackSection.style.display = 'block';
-            }
-
-            document.querySelectorAll(".quality-btn").forEach(btn => btn.classList.remove("active"));
-            if (button) { button.classList.add("active"); }
-        }
-
-        function extractQualities(videoData) {
-            let primaryUrl = null;
-            let qualities = {};
-            if (videoData.fast_stream_url) {
-                for (const q in videoData.fast_stream_url) {
-                    qualities[q] = videoData.fast_stream_url[q];
-                }
-                primaryUrl = qualities["1080p"] || qualities["720p"] || qualities["480p"] || qualities["360p"] || Object.values(qualities)[0];
-            }
-            if (!primaryUrl && videoData.normal_dlink) {
-                primaryUrl = videoData.normal_dlink;
-                qualities["MP4"] = primaryUrl;
-            }
-            return { primaryUrl, qualities };
-        }
-
-        function showResultCard(videoData, primaryUrl, qualities) {
-            pendingVideo = { title: videoData.name || "TeraBox Video", qualities, primaryUrl };
-            resultTitle.textContent = pendingVideo.title;
-
-            resultBadges.innerHTML = '';
-            if (videoData.quality) {
-                const b = document.createElement('span');
-                b.className = 'result-badge';
-                b.textContent = videoData.quality;
-                resultBadges.appendChild(b);
-            }
-            if (videoData.size_mb) {
-                const b = document.createElement('span');
-                b.className = 'result-badge';
-                b.textContent = `${videoData.size_mb} MB`;
-                resultBadges.appendChild(b);
-            }
-
-            resultThumbWrap.innerHTML = '';
-            if (videoData.thumb) {
-                const img = document.createElement('img');
-                img.src = videoData.thumb;
-                img.alt = pendingVideo.title;
-                img.onerror = () => { resultThumbWrap.innerHTML = '<span style="font-size: 2rem;">🎬</span>'; };
-                resultThumbWrap.appendChild(img);
-            } else {
-                resultThumbWrap.innerHTML = '<span style="font-size: 2rem;">🎬</span>';
-            }
-
-            resultCard.classList.add('show');
-            homeStatusMessage.textContent = '';
-        }
-
-        function playPendingVideo() {
-            const { title, qualities, primaryUrl } = pendingVideo;
-            if (!primaryUrl) {
-                setStatus("No playable video source found.", true, homeStatusMessage);
-                return;
-            }
-
-            videoTitle.textContent = title;
-            directLink.href = primaryUrl;
-            downloadVideoBtn.href = primaryUrl;
-
-            qualityButtonsContainer.innerHTML = '';
-            let firstButton = true;
-            for (const quality in qualities) {
-                const button = document.createElement("button");
-                button.textContent = quality;
-                button.className = 'quality-btn';
-                button.dataset.url = qualities[quality];
-                button.onclick = () => changeQuality(qualities[quality], button);
-                qualityButtonsContainer.appendChild(button);
-                if (firstButton) {
-                    button.classList.add("active");
-                    firstButton = false;
-                }
-            }
-
-            homePage.style.display = 'none';
-            playerPage.style.display = 'block';
-            changeQuality(primaryUrl, document.querySelector(".quality-btn.active"));
-        }
-
-        watchNowBtn.addEventListener('click', playPendingVideo);
-
-        shareBtn.addEventListener('click', () => {
-            if (navigator.share) {
-                navigator.share({ title: videoTitle.textContent, url: window.location.href });
-            } else {
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    setStatus("Link copied!");
-                });
-            }
-        });
-
-        // Decode URL-safe base64
         function decodeUrlSafeBase64(str) {
             let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-            while (base64.length % 4) { base64 += '='; }
+            while (base64.length % 4) base64 += '=';
             const binaryString = atob(base64);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
@@ -451,17 +408,188 @@
             return new TextDecoder().decode(bytes);
         }
 
-        // Process link from backend API
+        // ===== VIDEO FUNCTIONS =====
+        function extractQualities(videoData) {
+            let primaryUrl = null;
+            let qualities = {};
+
+            if (videoData.fast_stream_url) {
+                for (const q in videoData.fast_stream_url) {
+                    qualities[q] = videoData.fast_stream_url[q];
+                }
+                primaryUrl = qualities["1080p"] || qualities["720p"] || qualities["480p"] || qualities["360p"] || Object.values(qualities)[0];
+            }
+
+            if (!primaryUrl && videoData.normal_dlink) {
+                primaryUrl = videoData.normal_dlink;
+                qualities["MP4"] = primaryUrl;
+            }
+
+            return { primaryUrl, qualities };
+        }
+
+        function showResultCard(videoData, primaryUrl, qualities) {
+            pendingVideo = { title: videoData.name || "TeraBox Video", qualities, primaryUrl };
+
+            resultTitle.textContent = pendingVideo.title;
+            resultMeta.innerHTML = '';
+
+            if (videoData.quality) {
+                const badge = document.createElement('span');
+                badge.className = 'result-badge';
+                badge.textContent = videoData.quality;
+                resultMeta.appendChild(badge);
+            }
+
+            if (videoData.size_mb) {
+                const badge = document.createElement('span');
+                badge.className = 'result-badge';
+                badge.textContent = `${videoData.size_mb} MB`;
+                resultMeta.appendChild(badge);
+            }
+
+            resultThumb.innerHTML = '';
+            if (videoData.thumb) {
+                const img = document.createElement('img');
+                img.src = videoData.thumb;
+                img.alt = pendingVideo.title;
+                img.onerror = () => { resultThumb.innerHTML = '<span style="font-size: 2rem;">🎬</span>'; };
+                resultThumb.appendChild(img);
+            } else {
+                resultThumb.innerHTML = '<span style="font-size: 2rem;">🎬</span>';
+            }
+
+            resultCard.classList.add('show');
+            homeStatus.textContent = '';
+        }
+
+        function changeQuality(url, button) {
+            playerStatus.textContent = 'Loading...';
+            if (currentHls) currentHls.destroy();
+
+            if (Hls.isSupported() && url.endsWith(".m3u8")) {
+                currentHls = new Hls();
+                currentHls.loadSource(url);
+                currentHls.attachMedia(video);
+                currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play()
+                        .then(() => { playerStatus.textContent = 'Playing...'; })
+                        .catch(e => { playerStatus.textContent = `Error: ${e.message}`; });
+                });
+                currentHls.on(Hls.Events.ERROR, (event, data) => {
+                    playerStatus.textContent = `Error: ${data.type}`;
+                    fallbackSection.style.display = 'block';
+                });
+            } else if (video.canPlayType("video/mp4")) {
+                video.src = url;
+                video.play()
+                    .then(() => { playerStatus.textContent = 'Playing...'; })
+                    .catch(e => { playerStatus.textContent = `Error: ${e.message}`; });
+            } else {
+                playerStatus.textContent = 'Unsupported format';
+                fallbackSection.style.display = 'block';
+            }
+
+            document.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
+            if (button) button.classList.add('active');
+        }
+
+        // ===== ADSGRAM FUNCTIONS =====
+        function loadAdSgramSDK() {
+            return new Promise((resolve) => {
+                if (window.AdSgram) {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.adsgram.ai/adsgram.min.js';
+                script.onload = resolve;
+                script.onerror = resolve;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function showAdSgramAd() {
+            try {
+                await loadAdSgramSDK();
+
+                if (!window.AdSgram) {
+                    console.warn('AdSgram SDK not loaded');
+                    playVideo();
+                    return;
+                }
+
+                const tg = window.Telegram?.WebApp;
+                if (!tg || !tg.initData) {
+                    console.warn('Telegram WebApp not available');
+                    playVideo();
+                    return;
+                }
+
+                window.AdSgram.show({
+                    blockId: ADSGRAM_BLOCK_ID,
+                    onStart: () => {
+                        console.log('Ad started');
+                    },
+                    onClose: () => {
+                        console.log('Ad closed');
+                        playVideo();
+                    },
+                    onError: (error) => {
+                        console.error('Ad error:', error);
+                        playVideo();
+                    }
+                });
+            } catch (error) {
+                console.error('AdSgram error:', error);
+                playVideo();
+            }
+        }
+
+        function playVideo() {
+            const { title, qualities, primaryUrl } = pendingVideo;
+            if (!primaryUrl) {
+                playerStatus.textContent = 'No video source found';
+                return;
+            }
+
+            playerTitle.textContent = title;
+            directLink.href = primaryUrl;
+            downloadLink.href = primaryUrl;
+
+            qualityButtons.innerHTML = '';
+            let firstButton = true;
+            for (const quality in qualities) {
+                const btn = document.createElement('button');
+                btn.textContent = quality;
+                btn.className = 'quality-btn';
+                btn.onclick = () => changeQuality(qualities[quality], btn);
+                qualityButtons.appendChild(btn);
+                if (firstButton) {
+                    btn.classList.add('active');
+                    firstButton = false;
+                }
+            }
+
+            homePage.style.display = 'none';
+            playerPage.style.display = 'block';
+            changeQuality(primaryUrl, document.querySelector('.quality-btn.active'));
+        }
+
+        // ===== LINK PROCESSING =====
         async function processLink(link) {
-            showLoading(true);
-            homeStatusMessage.textContent = '';
+            showSpinner(true);
+            homeStatus.textContent = '';
             resultCard.classList.remove('show');
+
             try {
                 const response = await fetch(BACKEND_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: link })
                 });
+
                 const result = await response.json();
                 if (result.status === "success" && result.video_data) {
                     const videoData = result.video_data;
@@ -469,77 +597,70 @@
                     if (primaryUrl) {
                         showResultCard(videoData, primaryUrl, qualities);
                     } else {
-                        setStatus("No playable video source found.", true, homeStatusMessage);
+                        setStatus('No playable video source found', true);
                     }
                 } else {
-                    setStatus(`Error: ${result.message || 'Unknown error'}`, true, homeStatusMessage);
+                    setStatus(`Error: ${result.message || 'Unknown error'}`, true);
                 }
             } catch (e) {
-                setStatus(`Failed to process link: ${e.message}`, true, homeStatusMessage);
+                setStatus(`Failed to process link: ${e.message}`, true);
             } finally {
-                showLoading(false);
+                showSpinner(false);
             }
         }
 
-        // Initialize
-        document.addEventListener("DOMContentLoaded", () => {
+        // ===== EVENT LISTENERS =====
+        streamBtn.addEventListener('click', () => {
+            const link = teraboxInput.value.trim();
+            if (link) {
+                processLink(link);
+            } else {
+                setStatus('Please enter a TeraBox link', true);
+            }
+        });
+
+        teraboxInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') streamBtn.click();
+        });
+
+        watchNowBtn.addEventListener('click', showAdSgramAd);
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const encodedVideoData = urlParams.get("videoData");
-            const teraboxLinkFromUrl = urlParams.get("link");
+            const encodedVideoData = urlParams.get('videoData');
+            const teraboxLink = urlParams.get('link');
 
             if (encodedVideoData) {
                 try {
-                    // Try base64 decoding first (from bot)
                     let videoData;
                     try {
                         videoData = JSON.parse(decodeUrlSafeBase64(encodedVideoData));
                     } catch {
-                        // If base64 fails, try direct JSON (legacy)
                         videoData = JSON.parse(encodedVideoData);
                     }
-                    
+
                     const { primaryUrl, qualities } = extractQualities(videoData);
                     if (primaryUrl) {
-                        homePage.style.display = 'block';
-                        playerPage.style.display = 'none';
                         showResultCard(videoData, primaryUrl, qualities);
                     } else {
-                        setStatus("No playable video source found.", true, homeStatusMessage);
-                        homePage.style.display = 'block';
-                        playerPage.style.display = 'none';
+                        setStatus('No playable video source found', true);
                     }
                 } catch (e) {
-                    setStatus(`Error parsing video data: ${e.message}`, true, homeStatusMessage);
-                    homePage.style.display = 'block';
-                    playerPage.style.display = 'none';
+                    setStatus(`Error parsing video data: ${e.message}`, true);
                 }
-            } else if (teraboxLinkFromUrl) {
-                teraboxLinkInput.value = teraboxLinkFromUrl;
-                processLink(teraboxLinkFromUrl);
-                homePage.style.display = 'block';
-                playerPage.style.display = 'none';
-            } else {
-                homePage.style.display = 'block';
-                playerPage.style.display = 'none';
+            } else if (teraboxLink) {
+                teraboxInput.value = teraboxLink;
+                processLink(teraboxLink);
             }
 
-            streamButton.addEventListener('click', () => {
-                const link = teraboxLinkInput.value.trim();
-                if (link) {
-                    processLink(link);
-                } else {
-                    setStatus("Please enter a TeraBox link.", true, homeStatusMessage);
-                }
-            });
-
-            teraboxLinkInput.addEventListener('keydown', e => {
-                if (e.key === 'Enter') streamButton.click();
-            });
-
-            if (window.Telegram && window.Telegram.WebApp) {
+            if (window.Telegram?.WebApp) {
                 window.Telegram.WebApp.ready();
                 window.Telegram.WebApp.expand();
             }
+
+            homePage.style.display = 'block';
+            playerPage.style.display = 'none';
         });
     </script>
 </body>
