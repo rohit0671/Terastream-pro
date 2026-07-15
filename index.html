@@ -1,668 +1,625 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeraBox Video Player</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Video Player</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<style>
+  :root {
+    --bg:        #09090b;
+    --surface:   #16181d;
+    --surface-2: #1c1f26;
+    --border:    #272b34;
+    --accent:    #3d6dff;
+    --accent-2:  #8b5cf6;
+    --text:      #eef0f5;
+    --muted:     #7a8092;
+    --danger:    #ef4444;
+    --r-lg: 22px;
+    --r-md: 14px;
+    --r-sm: 9px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-t: env(safe-area-inset-top, 0px);
+  }
 
-        /* HOME PAGE */
-        #homePage {
-            display: block;
-            padding: 1rem;
-            max-width: 100%;
-        }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-        .paste-section {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    height: 100%;
+    overflow-x: hidden;
+  }
 
-        .input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
+  button { font-family: inherit; border: none; background: none; color: inherit; cursor: pointer; }
 
-        .terabox-input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            outline: none;
-        }
+  /* ── Loading ── */
+  #loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; gap: 16px; color: var(--muted);
+  }
+  .spinner {
+    width: 38px; height: 38px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-        .terabox-input:focus {
-            border-color: #2196F3;
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
-        }
+  /* ── Error ── */
+  #error {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; gap: 10px; padding: 24px; text-align: center;
+  }
+  #error .err-icon { font-size: 38px; }
+  #error strong { color: var(--text); font-size: 16px; }
+  #error p { color: var(--muted); font-size: 14px; max-width: 280px; }
 
-        .stream-btn {
-            padding: 0.75rem 1.5rem;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            white-space: nowrap;
-        }
+  /* ══════════ PREVIEW CARD (popup) ══════════ */
+  #preview-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 500;
+    background: radial-gradient(120% 90% at 50% 0%, #14131c 0%, #09090b 60%);
+  }
 
-        .stream-btn:hover {
-            background: #1976D2;
-        }
+  .preview-glow {
+    position: absolute;
+    top: 8%; left: 50%;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(61,109,255,0.28) 0%, rgba(139,92,246,0.10) 45%, transparent 70%);
+    transform: translateX(-50%);
+    filter: blur(10px);
+    pointer-events: none;
+  }
 
-        .stream-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+  .preview-card {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    animation: card-in .35s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(14px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-        .status-message {
-            font-size: 0.875rem;
-            margin-top: 0.75rem;
-            min-height: 20px;
-            color: #f59e0b;
-        }
+  .preview-thumb-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, #1a1c22, #101116);
+    overflow: hidden;
+  }
+  .preview-thumb-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .preview-thumb-img[hidden] { display: none; }
+  .preview-thumb-fallback {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    color: var(--border);
+  }
+  .preview-play-ring {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .preview-play-ring span {
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(10,10,14,0.55);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-size: 20px;
+    padding-left: 3px;
+  }
+  .preview-dur-chip {
+    position: absolute; right: 10px; bottom: 10px;
+    background: rgba(0,0,0,0.72);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .2px;
+  }
 
-        .status-message.error {
-            color: #e53935;
-        }
+  .preview-body { padding: 18px 18px calc(18px + var(--safe-b)); }
 
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(33, 150, 243, 0.2);
-            border-top-color: #2196F3;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-top: 0.75rem;
-        }
+  .preview-title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    word-break: break-word;
+  }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+  .preview-badges {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .badge {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .badge span { font-size: 13px; }
+  .badge strong { color: var(--text); font-weight: 600; }
 
-        /* RESULT CARD */
-        #resultCard {
-            display: none;
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+  .watch-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--r-md);
+    background: linear-gradient(180deg, #4a78ff, var(--accent) 60%, #2f57e0);
+    color: #fff;
+    font-size: 15.5px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 8px 22px rgba(61,109,255,0.35);
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .watch-btn:active { transform: scale(0.98); }
+  .watch-btn:disabled { opacity: .7; box-shadow: none; }
 
-        #resultCard.show {
-            display: block;
-        }
+  .mini-spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
 
-        .result-container {
-            display: flex;
-            gap: 1rem;
-            align-items: flex-start;
-        }
+  /* ══════════ FULLSCREEN CUSTOM PLAYER ══════════ */
+  #player-wrap {
+    display: none;
+    position: fixed; inset: 0;
+    background: #000;
+    z-index: 900;
+  }
+  .player-root {
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  #vid {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
 
-        .result-thumb {
-            width: 80px;
-            height: 80px;
-            flex-shrink: 0;
-            border-radius: 6px;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+  .tap-layer { position: absolute; inset: 0; z-index: 1; }
 
-        .result-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+  .buffering-spinner {
+    position: absolute; z-index: 2;
+    width: 42px; height: 42px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    display: none;
+    pointer-events: none;
+  }
 
-        .result-info {
-            flex: 1;
-        }
+  .controls-top, .controls-bottom, .center-controls {
+    position: absolute; z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .player-root.show-controls .controls-top,
+  .player-root.show-controls .controls-bottom,
+  .player-root.show-controls .center-controls {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-        .result-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #000;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            word-break: break-word;
-        }
+  .controls-top {
+    top: 0; left: 0; right: 0;
+    padding: calc(14px + var(--safe-t)) 14px 40px;
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65), transparent);
+  }
+  .back-btn {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .player-title-mini {
+    font-size: 14px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
 
-        .result-meta {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            flex-wrap: wrap;
-        }
+  .center-controls {
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 28px;
+  }
+  .ctrl-round {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    font-size: 18px;
+    line-height: 1;
+  }
+  .ctrl-round .ctrl-sub { font-size: 8px; margin-top: 1px; font-weight: 700; }
+  .ctrl-round.big {
+    width: 64px; height: 64px;
+    font-size: 24px;
+    background: rgba(255,255,255,0.16);
+  }
 
-        .result-badge {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            color: #666;
-        }
+  .controls-bottom {
+    left: 0; right: 0; bottom: 0;
+    padding: 30px 16px calc(14px + var(--safe-b));
+    background: linear-gradient(0deg, rgba(0,0,0,0.75), transparent);
+  }
 
-        .watch-now-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            background: linear-gradient(135deg, #2196F3, #00bcd4);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
-        }
+  .seek-wrap { position: relative; height: 20px; display: flex; align-items: center; margin-bottom: 4px; }
+  .seek-track {
+    position: absolute; left: 0; right: 0;
+    height: 4px; border-radius: 3px;
+    background: rgba(255,255,255,0.22);
+    overflow: visible;
+  }
+  .seek-buffered, .seek-progress {
+    position: absolute; top: 0; left: 0; height: 100%;
+    border-radius: 3px;
+  }
+  .seek-buffered { background: rgba(255,255,255,0.35); width: 0%; }
+  .seek-progress { background: linear-gradient(90deg, var(--accent), var(--accent-2)); width: 0%; }
+  .seek-thumb {
+    position: absolute; top: 50%; left: 0%;
+    width: 13px; height: 13px;
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.15);
+  }
+  .seek-input {
+    position: relative; z-index: 2;
+    width: 100%; height: 20px;
+    -webkit-appearance: none; appearance: none;
+    background: transparent;
+    margin: 0;
+  }
+  .seek-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    background: transparent;
+  }
+  .seek-input::-moz-range-thumb {
+    width: 20px; height: 20px;
+    background: transparent; border: none;
+  }
 
-        .watch-now-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-        }
+  .bottom-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 6px;
+  }
+  .time-txt { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .time-txt.muted { color: rgba(255,255,255,0.5); }
+  .time-sep { color: rgba(255,255,255,0.4); font-size: 12px; }
+  .spacer { flex: 1; }
+  .icon-btn {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 30px; height: 30px;
+    padding: 0 6px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    color: var(--text);
+  }
+  .icon-btn:active { background: rgba(255,255,255,0.12); }
 
-        /* PLAYER PAGE */
-        #playerPage {
-            display: none;
-            padding: 1rem;
-        }
-
-        .player-wrapper {
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%;
-            background: #000;
-        }
-
-        video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .player-info {
-            background: white;
-            padding: 1rem;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .video-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #000;
-            margin-bottom: 0.75rem;
-            word-break: break-word;
-        }
-
-        .quality-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 0.75rem;
-        }
-
-        .quality-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .quality-btn:hover {
-            border-color: #2196F3;
-            color: #2196F3;
-        }
-
-        .quality-btn.active {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-
-        .player-status {
-            font-size: 0.85rem;
-            color: #f59e0b;
-            margin-bottom: 0.75rem;
-            min-height: 18px;
-        }
-
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .download-btn:hover {
-            background: #1976D2;
-        }
-
-        .fallback-link {
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            color: #666;
-            display: none;
-        }
-
-        .fallback-link a {
-            color: #2196F3;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .fallback-link a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 600px) {
-            .input-group {
-                flex-direction: column;
-            }
-
-            .stream-btn {
-                width: 100%;
-            }
-        }
-    </style>
+  .speed-menu {
+    position: absolute;
+    right: 16px; bottom: calc(72px + var(--safe-b));
+    z-index: 4;
+    background: rgba(24,25,30,0.96);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .speed-menu button {
+    display: block;
+    width: 84px;
+    padding: 10px 14px;
+    font-size: 13px;
+    text-align: left;
+    color: var(--muted);
+  }
+  .speed-menu button.active { color: var(--accent); font-weight: 700; }
+  .speed-menu button:active { background: rgba(255,255,255,0.06); }
+</style>
 </head>
 <body>
-    <!-- HOME PAGE -->
-    <div id="homePage">
-        <div class="paste-section">
-            <div class="input-group">
-                <input type="text" id="terabox-input" class="terabox-input" placeholder="Paste TeraBox link here" autocomplete="off">
-                <button id="stream-btn" class="stream-btn">Stream</button>
-            </div>
-            <div class="status-message" id="home-status"></div>
-            <div class="loading-spinner" id="home-spinner"></div>
-        </div>
 
-        <div id="resultCard">
-            <div class="result-container">
-                <div class="result-thumb" id="result-thumb">
-                    <span style="font-size: 2rem;">🎬</span>
-                </div>
-                <div class="result-info">
-                    <div class="result-title" id="result-title">Video Title</div>
-                    <div class="result-meta" id="result-meta"></div>
-                    <button id="watch-now-btn" class="watch-now-btn">▶ Watch Now</button>
-                </div>
-            </div>
-        </div>
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Loading video...</p>
+</div>
+
+<div id="error">
+  <div class="err-icon">⚠️</div>
+  <strong id="err-title">Something went wrong</strong>
+  <p id="err-msg">Could not load the video.</p>
+</div>
+
+<!-- Preview / ad-style popup card -->
+<div id="preview-overlay">
+  <div class="preview-glow"></div>
+  <div class="preview-card">
+    <div class="preview-thumb-wrap">
+      <img class="preview-thumb-img" id="thumb-img" alt="" hidden />
+      <div class="preview-thumb-fallback" id="thumb-fallback">🎬</div>
+      <div class="preview-play-ring"><span>▶</span></div>
+      <div class="preview-dur-chip" id="preview-dur-chip" hidden></div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-title" id="preview-title">—</div>
+      <div class="preview-badges">
+        <div class="badge"><span>📦</span><strong id="p-size">—</strong></div>
+        <div class="badge"><span>🎞</span><strong id="p-mime">—</strong></div>
+      </div>
+      <button class="watch-btn" id="watch-btn">
+        <span id="watch-btn-label">Watch Now</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen custom player -->
+<div id="player-wrap">
+  <div class="player-root" id="player-root">
+    <video id="vid" playsinline preload="metadata"></video>
+
+    <div class="buffering-spinner" id="buffering-spinner"></div>
+    <div class="tap-layer" id="tap-layer"></div>
+
+    <div class="controls-top" id="controls-top">
+      <button class="back-btn" id="back-btn">←</button>
+      <div class="player-title-mini" id="player-title-mini">—</div>
     </div>
 
-    <!-- PLAYER PAGE -->
-    <div id="playerPage">
-        <div class="player-wrapper">
-            <div class="video-container">
-                <video id="video" controls playsinline crossorigin="anonymous"></video>
-            </div>
-            <div class="player-info">
-                <div class="video-title" id="player-title">Video Title</div>
-                <div class="player-status" id="player-status"></div>
-                <div class="quality-buttons" id="quality-buttons"></div>
-                <a id="download-link" class="download-btn" download>⬇ Download</a>
-                <div id="fallback-section" class="fallback-link">
-                    <p>If video doesn't play:</p>
-                    <a id="direct-link" href="#" target="_blank">Open in Browser</a>
-                </div>
-            </div>
-        </div>
+    <div class="center-controls" id="center-controls">
+      <button class="ctrl-round" id="skip-back-btn"><span>↺</span><span class="ctrl-sub">10</span></button>
+      <button class="ctrl-round big" id="center-play-btn">▶</button>
+      <button class="ctrl-round" id="skip-fwd-btn"><span>↻</span><span class="ctrl-sub">10</span></button>
     </div>
 
-    <!-- AdSgram Ad Container -->
-    <div id="adsgram-container"></div>
+    <div class="controls-bottom" id="controls-bottom">
+      <div class="seek-wrap">
+        <div class="seek-track" id="seek-track">
+          <div class="seek-buffered" id="seek-buffered"></div>
+          <div class="seek-progress" id="seek-progress"></div>
+          <div class="seek-thumb" id="seek-thumb"></div>
+        </div>
+        <input type="range" id="seek-input" class="seek-input" min="0" max="1000" step="1" value="0" />
+      </div>
+      <div class="bottom-row">
+        <span class="time-txt" id="time-current">0:00</span>
+        <span class="time-sep">/</span>
+        <span class="time-txt muted" id="time-duration">0:00</span>
+        <div class="spacer"></div>
+        <button class="icon-btn" id="speed-btn">1x</button>
+        <button class="icon-btn" id="mute-btn">🔊</button>
+        <button class="icon-btn" id="fullscreen-btn">⛶</button>
+      </div>
+    </div>
 
-    <script>
-        // ===== CONFIGURATION =====
-        const BACKEND_API_URL = "https://c69.justrunmy.app/api/terabox";
-        const ADSGRAM_BLOCK_ID = "int-37243";
+    <div class="speed-menu" id="speed-menu" hidden>
+      <button data-speed="0.5">0.5x</button>
+      <button data-speed="0.75">0.75x</button>
+      <button data-speed="1" class="active">1x</button>
+      <button data-speed="1.25">1.25x</button>
+      <button data-speed="1.5">1.5x</button>
+      <button data-speed="2">2x</button>
+    </div>
+  </div>
+</div>
 
-        // ===== DOM ELEMENTS =====
-        const homePage = document.getElementById('homePage');
-        const playerPage = document.getElementById('playerPage');
-        const teraboxInput = document.getElementById('terabox-input');
-        const streamBtn = document.getElementById('stream-btn');
-        const homeStatus = document.getElementById('home-status');
-        const homeSpinner = document.getElementById('home-spinner');
-        const resultCard = document.getElementById('resultCard');
-        const resultThumb = document.getElementById('result-thumb');
-        const resultTitle = document.getElementById('result-title');
-        const resultMeta = document.getElementById('result-meta');
-        const watchNowBtn = document.getElementById('watch-now-btn');
+<script>
+  /* ── Config ── */
+  const STREAM_SERVER_URL = "https://telegramfi-2a4.n.jrnm.app/";
+  const ADSGRAM_BLOCK_ID  = "int-37243";
 
-        const video = document.getElementById('video');
-        const playerTitle = document.getElementById('player-title');
-        const playerStatus = document.getElementById('player-status');
-        const qualityButtons = document.getElementById('quality-buttons');
-        const downloadLink = document.getElementById('download-link');
-        const directLink = document.getElementById('direct-link');
-        const fallbackSection = document.getElementById('fallback-section');
+  const params        = new URLSearchParams(window.location.search);
+  const msgId          = params.get("msg");
+  const STREAM_SERVER  = params.get("stream") || STREAM_SERVER_URL;
 
-        let currentHls = null;
-        let pendingVideo = { title: '', qualities: {}, primaryUrl: null };
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); tg.ready(); }
 
-        // ===== UTILITY FUNCTIONS =====
-        function setStatus(msg, isError = false, target = homeStatus) {
-            target.textContent = msg;
-            target.classList.toggle('error', isError);
-        }
+  /* ── Adsgram init ── */
+  let AdController = null;
+  try {
+    AdController = window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID }) || null;
+  } catch (e) {
+    console.warn("Adsgram init failed", e);
+  }
 
-        function showSpinner(show) {
-            homeSpinner.style.display = show ? 'block' : 'none';
-            streamBtn.disabled = show;
-        }
+  /* ── Helpers ── */
+  function fmtSize(b) {
+    const u = ["B","KB","MB","GB","TB"];
+    let i = 0;
+    while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+    return `${b.toFixed(1)} ${u[i]}`;
+  }
+  function fmtDur(s) {
+    if (!s) return null;
+    s = Math.floor(s);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return h
+      ? `${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`
+      : `${m}:${String(sec).padStart(2,"0")}`;
+  }
 
-        function decodeUrlSafeBase64(str) {
-            let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-            while (base64.length % 4) base64 += '=';
-            const binaryString = atob(base64);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return new TextDecoder().decode(bytes);
-        }
+  function showError(title, msg) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("preview-overlay").style.display = "none";
+    const el = document.getElementById("error");
+    el.style.display = "flex";
+    document.getElementById("err-title").textContent = title;
+    document.getElementById("err-msg").textContent   = msg;
+  }
 
-        // ===== VIDEO FUNCTIONS =====
-        function extractQualities(videoData) {
-            let primaryUrl = null;
-            let qualities = {};
+  /* ── Elements ── */
+  const els = {
+    thumbImg: document.getElementById("thumb-img"),
+    thumbFallback: document.getElementById("thumb-fallback"),
+    durChip: document.getElementById("preview-dur-chip"),
+    title: document.getElementById("preview-title"),
+    size: document.getElementById("p-size"),
+    mime: document.getElementById("p-mime"),
+    watchBtn: document.getElementById("watch-btn"),
+    watchBtnLabel: document.getElementById("watch-btn-label"),
+    previewOverlay: document.getElementById("preview-overlay"),
+    playerWrap: document.getElementById("player-wrap"),
+    playerRoot: document.getElementById("player-root"),
+    vid: document.getElementById("vid"),
+    tapLayer: document.getElementById("tap-layer"),
+    backBtn: document.getElementById("back-btn"),
+    playerTitleMini: document.getElementById("player-title-mini"),
+    centerPlayBtn: document.getElementById("center-play-btn"),
+    skipBackBtn: document.getElementById("skip-back-btn"),
+    skipFwdBtn: document.getElementById("skip-fwd-btn"),
+    seekInput: document.getElementById("seek-input"),
+    seekBuffered: document.getElementById("seek-buffered"),
+    seekProgress: document.getElementById("seek-progress"),
+    seekThumb: document.getElementById("seek-thumb"),
+    timeCurrent: document.getElementById("time-current"),
+    timeDuration: document.getElementById("time-duration"),
+    speedBtn: document.getElementById("speed-btn"),
+    speedMenu: document.getElementById("speed-menu"),
+    muteBtn: document.getElementById("mute-btn"),
+    fullscreenBtn: document.getElementById("fullscreen-btn"),
+    bufferingSpinner: document.getElementById("buffering-spinner"),
+  };
 
-            if (videoData.fast_stream_url) {
-                for (const q in videoData.fast_stream_url) {
-                    qualities[q] = videoData.fast_stream_url[q];
-                }
-                primaryUrl = qualities["1080p"] || qualities["720p"] || qualities["480p"] || qualities["360p"] || Object.values(qualities)[0];
-            }
+  let videoInfo = null;
+  let isScrubbing = false;
 
-            if (!primaryUrl && videoData.normal_dlink) {
-                primaryUrl = videoData.normal_dlink;
-                qualities["MP4"] = primaryUrl;
-            }
+  /* ── Entry ── */
+  if (!msgId) {
+    showError("No Video Selected", "Open a shared video link from the bot to start watching.");
+  } else {
+    loadInfo(msgId);
+  }
 
-            return { primaryUrl, qualities };
-        }
+  async function loadInfo(id) {
+    try {
+      const res = await fetch(`${STREAM_SERVER}/info?msg=${id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      videoInfo = await res.json();
+    } catch (e) {
+      showError("Video Not Found", "This video may have been deleted or the link is invalid.");
+      return;
+    }
+    populatePreview(videoInfo);
+    document.getElementById("loading").style.display = "none";
+    els.previewOverlay.style.display = "flex";
+  }
 
-        function showResultCard(videoData, primaryUrl, qualities) {
-            pendingVideo = { title: videoData.name || "TeraBox Video", qualities, primaryUrl };
+  function populatePreview(info) {
+    els.title.textContent = info.title || "Video";
+    els.playerTitleMini.textContent = info.title || "Video";
+    els.size.textContent = fmtSize(info.size || 0);
+    els.mime.textContent = (info.mime_type || "video/mp4").replace("video/", "").toUpperCase();
 
-            resultTitle.textContent = pendingVideo.title;
-            resultMeta.innerHTML = '';
+    const dur = fmtDur(info.duration);
+    if (dur) {
+      els.durChip.textContent = dur;
+      els.durChip.hidden = false;
+    }
 
-            if (videoData.quality) {
-                const badge = document.createElement('span');
-                badge.className = 'result-badge';
-                badge.textContent = videoData.quality;
-                resultMeta.appendChild(badge);
-            }
+    const thumbUrl = `${STREAM_SERVER}/thumb?msg=${msgId}`;
+    els.thumbImg.onload  = () => { els.thumbImg.hidden = false; els.thumbFallback.style.display = "none"; };
+    els.thumbImg.onerror = () => { els.thumbImg.hidden = true;  els.thumbFallback.style.display = "flex"; };
+    els.thumbImg.src = thumbUrl;
+  }
 
-            if (videoData.size_mb) {
-                const badge = document.createElement('span');
-                badge.className = 'result-badge';
-                badge.textContent = `${videoData.size_mb} MB`;
-                resultMeta.appendChild(badge);
-            }
+  /* ── Watch Now → Ad → Player ── */
+  els.watchBtn.addEventListener("click", () => {
+    els.watchBtn.disabled = true;
+    els.watchBtnLabel.textContent = "Loading...";
 
-            resultThumb.innerHTML = '';
-            if (videoData.thumb) {
-                const img = document.createElement('img');
-                img.src = videoData.thumb;
-                img.alt = pendingVideo.title;
-                img.onerror = () => { resultThumb.innerHTML = '<span style="font-size: 2rem;">🎬</span>'; };
-                resultThumb.appendChild(img);
-            } else {
-                resultThumb.innerHTML = '<span style="font-size: 2rem;">🎬</span>';
-            }
+    const proceed = () => {
+      els.previewOverlay.style.display = "none";
+      openPlayer();
+    };
 
-            resultCard.classList.add('show');
-            homeStatus.textContent = '';
-        }
+    if (AdController) {
+      AdController.show().then(proceed).catch((result) => {
+        console.warn("Adsgram: ad not completed", result);
+        proceed();
+      });
+    } else {
+      proceed();
+    }
+  });
 
-        function changeQuality(url, button) {
-            playerStatus.textContent = 'Loading...';
-            if (currentHls) currentHls.destroy();
+  /* ── Player open/close ── */
+  function openPlayer() {
+    els.vid.src = `${STREAM_SERVER}/stream?msg=${msgId}`;
+    els.playerWrap.style.display = "block";
+    els.vid.play().catch(() => {});
+    showControls(true);
+  }
 
-            if (Hls.isSupported() && url.endsWith(".m3u8")) {
-                currentHls = new Hls();
-                currentHls.loadSource(url);
-                currentHls.attachMedia(video);
-                currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play()
-                        .then(() => { playerStatus.textContent = 'Playing...'; })
-                        .catch(e => { playerStatus.textContent = `Error: ${e.message}`; });
-                });
-                currentHls.on(Hls.Events.ERROR, (event, data) => {
-                    playerStatus.textContent = `Error: ${data.type}`;
-                    fallbackSection.style.display = 'block';
-                });
-            } else if (video.canPlayType("video/mp4")) {
-                video.src = url;
-                video.play()
-                    .then(() => { playerStatus.textContent = 'Playing...'; })
-                    .catch(e => { playerStatus.textContent = `Error: ${e.message}`; });
-            } else {
-                playerStatus.textContent = 'Unsupported format';
-                fallbackSection.style.display = 'block';
-            }
+  els.backBtn.addEventListener("click", () => {
+    els.vid.pause();
+    els.playerWrap.style.display = "none";
+    els.previewOverlay.style.display = "flex";
+    els.watchBtn.disabled = false;
+    els.watchBtnLabel.textContent = "Watch Now";
+  });
 
-            document.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
-            if (button) button.classList.add('active');
-        }
+  /* ── Controls visibility ── */
+  let hideTimer = null;
+  function showControls(persist) {
+    els.playerRoot.classList.add("show-controls");
+    clearTimeout(hideTimer);
+    if (!persist && !els.vid.paused) {
+      hideTimer = setTimeout(() => els.playerRoot.classList.remove("show-controls"), 3000);
+    }
+  }
+  els.tapLayer.addEventListener("click", () => {
+    if (els.playerRoot.classList.contains("show-controls")) {
+      els.playerRoot.classList.remove("show-controls");
+      clearTimeout(hideTimer);
+    } else {
+      showControls(false);
+    }
+    els.speedMenu.hidden = true;
+  });
 
-        // ===== ADSGRAM FUNCTIONS =====
-        function loadAdSgramSDK() {
-            return new Promise((resolve) => {
-                if (window.AdSgram) {
-                    resolve();
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = 'https://cdn.adsgram.ai/adsgram.min.js';
-                script.onload = resolve;
-                script.onerror = resolve;
-                document.head.appendChild(script);
-            });
-        }
-
-        async function showAdSgramAd() {
-            try {
-                await loadAdSgramSDK();
-
-                if (!window.AdSgram) {
-                    console.warn('AdSgram SDK not loaded');
-                    playVideo();
-                    return;
-                }
-
-                const tg = window.Telegram?.WebApp;
-                if (!tg || !tg.initData) {
-                    console.warn('Telegram WebApp not available');
-                    playVideo();
-                    return;
-                }
-
-                window.AdSgram.show({
-                    blockId: ADSGRAM_BLOCK_ID,
-                    onStart: () => {
-                        console.log('Ad started');
-                    },
-                    onClose: () => {
-                        console.log('Ad closed');
-                        playVideo();
-                    },
-                    onError: (error) => {
-                        console.error('Ad error:', error);
-                        playVideo();
-                    }
-                });
-            } catch (error) {
-                console.error('AdSgram error:', error);
-                playVideo();
-            }
-        }
-
-        function playVideo() {
-            const { title, qualities, primaryUrl } = pendingVideo;
-            if (!primaryUrl) {
-                playerStatus.textContent = 'No video source found';
-                return;
-            }
-
-            playerTitle.textContent = title;
-            directLink.href = primaryUrl;
-            downloadLink.href = primaryUrl;
-
-            qualityButtons.innerHTML = '';
-            let firstButton = true;
-            for (const quality in qualities) {
-                const btn = document.createElement('button');
-                btn.textContent = quality;
-                btn.className = 'quality-btn';
-                btn.onclick = () => changeQuality(qualities[quality], btn);
-                qualityButtons.appendChild(btn);
-                if (firstButton) {
-                    btn.classList.add('active');
-                    firstButton = false;
-                }
-            }
-
-            homePage.style.display = 'none';
-            playerPage.style.display = 'block';
-            changeQuality(primaryUrl, document.querySelector('.quality-btn.active'));
-        }
-
-        // ===== LINK PROCESSING =====
-        async function processLink(link) {
-            showSpinner(true);
-            homeStatus.textContent = '';
-            resultCard.classList.remove('show');
-
-            try {
-                const response = await fetch(BACKEND_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: link })
-                });
-
-                const result = await response.json();
-                if (result.status === "success" && result.video_data) {
-                    const videoData = result.video_data;
-                    const { primaryUrl, qualities } = extractQualities(videoData);
-                    if (primaryUrl) {
-                        showResultCard(videoData, primaryUrl, qualities);
-                    } else {
-                        setStatus('No playable video source found', true);
-                    }
-                } else {
-                    setStatus(`Error: ${result.message || 'Unknown error'}`, true);
-                }
-            } catch (e) {
-                setStatus(`Failed to process link: ${e.message}`, true);
-            } finally {
-                showSpinner(false);
-            }
-        }
-
-        // ===== EVENT LISTENERS =====
-        streamBtn.addEventListener('click', () => {
-            const link = teraboxInput.value.trim();
-            if (link) {
-                processLink(link);
-            } else {
-                setStatus('Please enter a TeraBox link', true);
-            }
-        });
-
-        teraboxInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') streamBtn.click();
-        });
-
-        watchNowBtn.addEventListener('click', showAdSgramAd);
-        // Ads play when Watch Now is clicked - no separate button needed
-
-        // ===== INITIALIZATION =====
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedVideoData = urlParams.get('videoData');
-            const teraboxLink = urlParams.get('link');
-
-            if (encodedVideoData) {
-                try {
-                    let videoData;
-                    try {
-                        videoData = JSON.parse(decodeUrlSafeBase64(encodedVideoData));
-                    } catch {
-                        videoData = JSON.parse(encodedVideoData);
-                    }
-
-                    const { primaryUrl, qualities } = extractQualities(videoData);
-                    if (primaryUrl) {
-                        showResultCard(videoData, primaryUrl, qualities);
-                    } else {
-                        setStatus('No playable video source found', true);
-                    }
-                } catch (e) {
-                    setStatus(`Error parsing video data: ${e.message}`, true);
-                }
-            } else if (teraboxLink) {
-                teraboxInput.value = teraboxLink;
-                processLink(teraboxLink);
-            }
-
-            if (window.Telegram?.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
-            }
-
-            homePage.style.display = 'block';
-            playerPage.style.display = 'none';
-        });
-    </script>
-</body>
-</html>
+  /* ── Play / pause ── */
+  function togglePlay() {
+    if (els.vid.paused) els.vid.play(); else els.vid.pause();
+  }
+  els.centerPlayBtn.addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
+  els.vid.addEventListener("play",  () => { els.cente
