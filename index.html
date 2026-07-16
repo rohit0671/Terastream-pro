@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Video Player</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js" defer></script>
 <style>
   :root {
     --bg:        #09090b;
@@ -443,6 +443,7 @@
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
   /* ── Config ── */
   const STREAM_SERVER_URL = "https://tgfilestor-fd6.f.jrnm.app";
   const ADSGRAM_BLOCK_ID  = "int-37243";
@@ -608,5 +609,4 @@
     showControls(true); // keep controls visible; don't assume autoplay works
 
     // Try to autoplay (works on desktop / when no ad delay broke the user
-    // gesture). If the browser blocks it, we just silently stay paused —
-    // the big ▶ button is already visible so the user can t
+    // gesture). If the browser blocks it, we just silently st
