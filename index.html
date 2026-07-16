@@ -444,12 +444,14 @@
 
 <script>
   /* ── Config ── */
-  const STREAM_SERVER_URL = "https://telegramfi-b89.f.jrnm.app/";
+  const STREAM_SERVER_URL = "https://telegramfi-2a4.n.jrnm.app";
   const ADSGRAM_BLOCK_ID  = "int-37243";
 
   const params        = new URLSearchParams(window.location.search);
   const msgId          = params.get("msg");
-  const STREAM_SERVER  = params.get("stream") || STREAM_SERVER_URL;
+  let base = params.get("stream") || STREAM_SERVER_URL;
+  if (base.endsWith("/")) base = base.slice(0, -1);
+  const STREAM_SERVER = base;
 
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.expand(); tg.ready(); }
@@ -481,6 +483,7 @@
   function showError(title, msg) {
     document.getElementById("loading").style.display = "none";
     document.getElementById("preview-overlay").style.display = "none";
+    document.getElementById("player-wrap").style.display = "none";
     const el = document.getElementById("error");
     el.style.display = "flex";
     document.getElementById("err-title").textContent = title;
@@ -567,10 +570,21 @@
     els.watchBtn.disabled = true;
     els.watchBtnLabel.textContent = "Loading...";
 
+    let proceeded = false;
     const proceed = () => {
+      if (proceeded) return;
+      proceeded = true;
+      clearTimeout(safetyTimer);
       els.previewOverlay.style.display = "none";
       openPlayer();
     };
+
+    // Safety net: if the ad SDK hangs (slow load, no fill, network hiccup),
+    // never leave the user stuck on "Loading...". Fall through to the video.
+    const safetyTimer = setTimeout(() => {
+      console.warn("Adsgram: no response in time, continuing without ad");
+      proceed();
+    }, 8000);
 
     if (AdController) {
       AdController.show().then(proceed).catch((result) => {
@@ -586,40 +600,18 @@
   function openPlayer() {
     els.vid.src = `${STREAM_SERVER}/stream?msg=${msgId}`;
     els.playerWrap.style.display = "block";
-    els.vid.play().catch(() => {});
-    showControls(true);
+    showControls(true); // keep controls visible; don't assume autoplay works
+
+    // Try to autoplay (works on desktop / when no ad delay broke the user
+    // gesture). If the browser blocks it, we just silently stay paused —
+    // the big ▶ button is already visible so the user can tap to start.
+    const playPromise = els.vid.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => { /* autoplay blocked — user taps ▶ instead */ });
+    }
   }
 
   els.backBtn.addEventListener("click", () => {
     els.vid.pause();
     els.playerWrap.style.display = "none";
-    els.previewOverlay.style.display = "flex";
-    els.watchBtn.disabled = false;
-    els.watchBtnLabel.textContent = "Watch Now";
-  });
-
-  /* ── Controls visibility ── */
-  let hideTimer = null;
-  function showControls(persist) {
-    els.playerRoot.classList.add("show-controls");
-    clearTimeout(hideTimer);
-    if (!persist && !els.vid.paused) {
-      hideTimer = setTimeout(() => els.playerRoot.classList.remove("show-controls"), 3000);
-    }
-  }
-  els.tapLayer.addEventListener("click", () => {
-    if (els.playerRoot.classList.contains("show-controls")) {
-      els.playerRoot.classList.remove("show-controls");
-      clearTimeout(hideTimer);
-    } else {
-      showControls(false);
-    }
-    els.speedMenu.hidden = true;
-  });
-
-  /* ── Play / pause ── */
-  function togglePlay() {
-    if (els.vid.paused) els.vid.play(); else els.vid.pause();
-  }
-  els.centerPlayBtn.addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
-  els.vid.addEventListener("play",  () => { els.cente
+    els.previewOverlay.style.display
