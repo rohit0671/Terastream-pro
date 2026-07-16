@@ -444,14 +444,12 @@
 
 <script>
   /* ── Config ── */
-  const STREAM_SERVER_URL = "https://tgfilestor-fd6.f.jrnm.app/";
+  const STREAM_SERVER_URL = "https://tgfilestor-fd6.f.jrnm.app";
   const ADSGRAM_BLOCK_ID  = "int-37243";
 
   const params        = new URLSearchParams(window.location.search);
   const msgId          = params.get("msg");
-  let base = params.get("stream") || STREAM_SERVER_URL;
-  if (base.endsWith("/")) base = base.slice(0, -1);
-  const STREAM_SERVER = base;
+  const STREAM_SERVER  = (params.get("stream") || STREAM_SERVER_URL).replace(/\/+$/, "");
 
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.expand(); tg.ready(); }
@@ -535,11 +533,18 @@
 
   async function loadInfo(id) {
     try {
-      const res = await fetch(`${STREAM_SERVER}/info?msg=${id}`);
+      const controller = new AbortController();
+      const timeoutId  = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(`${STREAM_SERVER}/info?msg=${id}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       videoInfo = await res.json();
     } catch (e) {
-      showError("Video Not Found", "This video may have been deleted or the link is invalid.");
+      console.error("Failed to load video info", e);
+      const msg = e.name === "AbortError"
+        ? "The server took too long to respond. Please check the stream server and try again."
+        : "This video may have been deleted or the link is invalid.";
+      showError("Video Not Found", msg);
       return;
     }
     populatePreview(videoInfo);
@@ -604,14 +609,4 @@
 
     // Try to autoplay (works on desktop / when no ad delay broke the user
     // gesture). If the browser blocks it, we just silently stay paused —
-    // the big ▶ button is already visible so the user can tap to start.
-    const playPromise = els.vid.play();
-    if (playPromise && playPromise.catch) {
-      playPromise.catch(() => { /* autoplay blocked — user taps ▶ instead */ });
-    }
-  }
-
-  els.backBtn.addEventListener("click", () => {
-    els.vid.pause();
-    els.playerWrap.style.display = "none";
-    els.previewOverlay.style.display
+    // the big ▶ button is already visible so the user can t
