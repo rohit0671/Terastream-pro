@@ -607,4 +607,192 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ── Watch Now → Ad → Player ── */
   els.watchBtn.addEventListener("click", () => {
     els.watchBtn.disabled = true;
-    els.watc
+    els.watchBtnLabel.textContent = "Loading...";
+ 
+    let proceeded = false;
+    const proceed = () => {
+      if (proceeded) return;
+      proceeded = true;
+      clearTimeout(safetyTimer);
+      els.previewOverlay.style.display = "none";
+      openPlayer();
+    };
+ 
+    // Safety net: if the ad SDK hangs (slow load, no fill, network hiccup),
+    // never leave the user stuck on "Loading...". Fall through to the video.
+    const safetyTimer = setTimeout(() => {
+      console.warn("Adsgram: no response in time, continuing without ad");
+      proceed();
+    }, 8000);
+ 
+    if (AdController) {
+      AdController.show().then(proceed).catch((result) => {
+        console.warn("Adsgram: ad not completed", result);
+        proceed();
+      });
+    } else {
+      proceed();
+    }
+  });
+ 
+  /* ── Player open/close ── */
+  function openPlayer() {
+    els.vid.src = `${STREAM_SERVER}/stream?msg=${msgId}`;
+    els.playerWrap.style.display = "block";
+    showControls(true); // keep controls visible; don't assume autoplay works
+ 
+    // Try to autoplay (works on desktop / when no ad delay broke the user
+    // gesture). If the browser blocks it, we just silently stay paused —
+    // the big ▶ button is already visible so the user can tap to start.
+    const playPromise = els.vid.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => { /* autoplay blocked — user taps ▶ instead */ });
+    }
+  }
+ 
+  els.backBtn.addEventListener("click", () => {
+    els.vid.pause();
+    els.playerWrap.style.display = "none";
+    els.previewOverlay.style.display = "flex";
+    els.watchBtn.disabled = false;
+    els.watchBtnLabel.textContent = "Watch Now";
+  });
+ 
+  /* ── Controls visibility ── */
+  let hideTimer = null;
+  function showControls(persist) {
+    els.playerRoot.classList.add("show-controls");
+    clearTimeout(hideTimer);
+    if (!persist && !els.vid.paused) {
+      hideTimer = setTimeout(() => els.playerRoot.classList.remove("show-controls"), 3000);
+    }
+  }
+  els.tapLayer.addEventListener("click", () => {
+    if (els.playerRoot.classList.contains("show-controls")) {
+      els.playerRoot.classList.remove("show-controls");
+      clearTimeout(hideTimer);
+    } else {
+      showControls(false);
+    }
+    els.speedMenu.hidden = true;
+  });
+ 
+  /* ── Play / pause ── */
+  function togglePlay() {
+    if (els.vid.paused) els.vid.play(); else els.vid.pause();
+  }
+  els.centerPlayBtn.addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
+  els.vid.addEventListener("play",  () => { els.centerPlayBtn.textContent = "⏸"; showControls(false); });
+  els.vid.addEventListener("pause", () => { els.centerPlayBtn.textContent = "▶"; showControls(true); });
+  els.vid.addEventListener("ended", () => { els.centerPlayBtn.textContent = "↻"; showControls(true); });
+ 
+  /* ── Buffering indicator ── */
+  els.vid.addEventListener("waiting", () => { els.bufferingSpinner.style.display = "block"; });
+  els.vid.addEventListener("playing", () => { els.bufferingSpinner.style.display = "none"; });
+  els.vid.addEventListener("canplay", () => { els.bufferingSpinner.style.display = "none"; });
+ 
+  /* ── Skip ±10s ── */
+  els.skipBackBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    els.vid.currentTime = Math.max(0, els.vid.currentTime - 10);
+    showControls(false);
+  });
+  els.skipFwdBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    els.vid.currentTime = Math.min(els.vid.duration || Infinity, els.vid.currentTime + 10);
+    showControls(false);
+  });
+ 
+  /* ── Seek bar / buffered / time ── */
+  els.vid.addEventListener("loadedmetadata", () => {
+    els.timeDuration.textContent = fmtDur(els.vid.duration) || "0:00";
+  });
+  els.vid.addEventListener("timeupdate", () => {
+    if (isScrubbing) return;
+    updateSeekUI();
+  });
+  els.vid.addEventListener("progress", () => {
+    if (els.vid.buffered.length && els.vid.duration) {
+      const pct = (els.vid.buffered.end(els.vid.buffered.length - 1) / els.vid.duration) * 100;
+      els.seekBuffered.style.width = pct + "%";
+    }
+  });
+ 
+  function updateSeekUI() {
+    const dur = els.vid.duration || 0;
+    const cur = els.vid.currentTime || 0;
+    const pct = dur ? (cur / dur) * 100 : 0;
+    els.seekProgress.style.width = pct + "%";
+    els.seekThumb.style.left = pct + "%";
+    els.seekInput.value = dur ? Math.round((cur / dur) * 1000) : 0;
+    els.timeCurrent.textContent = fmtDur(cur) || "0:00";
+  }
+ 
+  els.seekInput.addEventListener("input", () => {
+    isScrubbing = true;
+    const dur = els.vid.duration || 0;
+    const pct = els.seekInput.value / 1000;
+    els.seekProgress.style.width = (pct * 100) + "%";
+    els.seekThumb.style.left = (pct * 100) + "%";
+    els.timeCurrent.textContent = fmtDur(pct * dur) || "0:00";
+    showControls(true);
+  });
+  els.seekInput.addEventListener("change", () => {
+    const dur = els.vid.duration || 0;
+    els.vid.currentTime = (els.seekInput.value / 1000) * dur;
+    isScrubbing = false;
+    showControls(false);
+  });
+ 
+  /* ── Speed menu ── */
+  els.speedBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    els.speedMenu.hidden = !els.speedMenu.hidden;
+    showControls(true);
+  });
+  els.speedMenu.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rate = parseFloat(btn.dataset.speed);
+      els.vid.playbackRate = rate;
+      els.speedBtn.textContent = rate + "x";
+      els.speedMenu.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      els.speedMenu.hidden = true;
+    });
+  });
+ 
+  /* ── Mute ── */
+  els.muteBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    els.vid.muted = !els.vid.muted;
+    els.muteBtn.textContent = els.vid.muted ? "🔇" : "🔊";
+    showControls(false);
+  });
+ 
+  /* ── Fullscreen ── */
+  els.fullscreenBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    if (fsEl) {
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    } else if (els.playerRoot.requestFullscreen) {
+      els.playerRoot.requestFullscreen().catch(() => {});
+    } else if (els.playerRoot.webkitRequestFullscreen) {
+      els.playerRoot.webkitRequestFullscreen();
+    } else if (els.vid.webkitEnterFullscreen) {
+      els.vid.webkitEnterFullscreen();
+    }
+    showControls(false);
+  });
+ 
+  els.vid.addEventListener("error", () => {
+    els.bufferingSpinner.style.display = "none";
+    console.error("Video error", els.vid.error);
+    showError("Playback Error", "Could not load this video. Check your connection and try again.");
+  });
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
+ 
