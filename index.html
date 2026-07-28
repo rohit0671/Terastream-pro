@@ -499,8 +499,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ── Adsgram init ── */
   let AdController = null;
+  let adsgramNoFill = false;
   try {
     AdController = window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID }) || null;
+    if (AdController) {
+      AdController.addEventListener("onBannerNotFound", () => {
+        adsgramNoFill = true;
+        console.warn("Adsgram: no ad available for this block");
+      });
+    }
   } catch (e) {
     console.warn("Adsgram init failed", e);
   }
