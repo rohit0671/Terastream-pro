@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
-          <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-          <script>
-            window.TelegramAdsController = new TelegramAdsController();
-            window.TelegramAdsController.initialize({
-              pubId: "988727",
-              appId: "8246",
-            });
-          </script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Video Player</title>
@@ -454,7 +445,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   /* ── Config ── */
-  const STREAM_SERVER_URL = "https://tgfilestor-a18.a.jrnm.app/";
+  const STREAM_SERVER_URL = "https://tgfilestor-fd6.f.jrnm.app";
   const ADSGRAM_BLOCK_ID  = "int-37243";
 
   const params        = new URLSearchParams(window.location.search);
@@ -499,15 +490,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ── Adsgram init ── */
   let AdController = null;
-  let adsgramNoFill = false;
   try {
     AdController = window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID }) || null;
-    if (AdController) {
-      AdController.addEventListener("onBannerNotFound", () => {
-        adsgramNoFill = true;
-        console.warn("Adsgram: no ad available for this block");
-      });
-    }
   } catch (e) {
     console.warn("Adsgram init failed", e);
   }
@@ -637,37 +621,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Safety net: if the ad SDK hangs (slow load, no fill, network hiccup),
     // never leave the user stuck on "Loading...". Fall through to the video.
     const safetyTimer = setTimeout(() => {
-      console.warn("Ad SDKs: no response in time, continuing without ad");
+      console.warn("Adsgram: no response in time, continuing without ad");
       proceed();
-    }, 10000);
+    }, 8000);
  
-    function tryRichAds() {
-      if (window.TelegramAdsController) {
-        window.TelegramAdsController.triggerInterstitialVideo()
-          .then(proceed)
-          .catch((result) => {
-            console.warn("RichAds: no ad available either", result);
-            proceed();
-          });
-      } else {
-        proceed();
-      }
-    }
-
     if (AdController) {
-      adsgramNoFill = false;
-      AdController.show()
-        .then(proceed)
-        .catch((result) => {
-          console.warn("Adsgram: did not complete", result);
-          if (adsgramNoFill) {
-            tryRichAds();
-          } else {
-            proceed();
-          }
-        });
+      AdController.show().then(proceed).catch((result) => {
+        console.warn("Adsgram: ad not completed", result);
+        proceed();
+      });
     } else {
-      tryRichAds();
+      proceed();
     }
   });
  
@@ -831,3 +795,4 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 </body>
 </html>
+ 
