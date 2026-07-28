@@ -637,17 +637,37 @@ document.addEventListener("DOMContentLoaded", function () {
     // Safety net: if the ad SDK hangs (slow load, no fill, network hiccup),
     // never leave the user stuck on "Loading...". Fall through to the video.
     const safetyTimer = setTimeout(() => {
-      console.warn("Adsgram: no response in time, continuing without ad");
+      console.warn("Ad SDKs: no response in time, continuing without ad");
       proceed();
-    }, 8000);
+    }, 10000);
  
-    if (AdController) {
-      AdController.show().then(proceed).catch((result) => {
-        console.warn("Adsgram: ad not completed", result);
+    function tryRichAds() {
+      if (window.TelegramAdsController) {
+        window.TelegramAdsController.triggerInterstitialVideo()
+          .then(proceed)
+          .catch((result) => {
+            console.warn("RichAds: no ad available either", result);
+            proceed();
+          });
+      } else {
         proceed();
-      });
+      }
+    }
+
+    if (AdController) {
+      adsgramNoFill = false;
+      AdController.show()
+        .then(proceed)
+        .catch((result) => {
+          console.warn("Adsgram: did not complete", result);
+          if (adsgramNoFill) {
+            tryRichAds();
+          } else {
+            proceed();
+          }
+        });
     } else {
-      proceed();
+      tryRichAds();
     }
   });
  
