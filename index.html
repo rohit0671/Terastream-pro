@@ -447,7 +447,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   /* ── Config ── */
   const STREAM_SERVER_URL = "https://tgfilestor-a18.a.jrnm.app/";
-  const ADSGRAM_BLOCK_ID  = "int-37243";
+  const ADSGRAM_BLOCK_ID_1 = "int-37243";
+  const ADSGRAM_BLOCK_ID_2 = "int-41737";
 
   const params        = new URLSearchParams(window.location.search);
   const STREAM_SERVER  = (params.get("stream") || STREAM_SERVER_URL).replace(/\/+$/, "");
@@ -489,12 +490,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const msgId = getStartParam();
 
-  /* ── Adsgram init ── */
-  let AdController = null;
+  /* ── Adsgram init (two sequential interstitials before playback) ── */
+  let AdController1 = null;
+  let AdController2 = null;
   try {
-    AdController = window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID }) || null;
+    AdController1 = window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID_1 }) || null;
   } catch (e) {
-    console.warn("Adsgram init failed", e);
+    console.warn("Adsgram init failed (block 1)", e);
+  }
+  try {
+    AdController2 = window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID_2 }) || null;
+  } catch (e) {
+    console.warn("Adsgram init failed (block 2)", e);
   }
 
   /* ── Helpers ── */
@@ -600,40 +607,53 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const thumbUrl = `${STREAM_SERVER}/thumb?msg=${msgId}`;
-    els.thumbImg.onload  = () => { els.thumbImg.hidden = false; els.thumbFallback.style.display = "none"; };
+    els.thumbImg.onload  = () => { els.th    els.thumbImg.onload  = () => { els.thumbImg.hidden = false; els.thumbFallback.style.display = "none"; };
     els.thumbImg.onerror = () => { els.thumbImg.hidden = true;  els.thumbFallback.style.display = "flex"; };
     els.thumbImg.src = thumbUrl;
   }
-
+ 
   /* ── Watch Now → Ad → Player ── */
+  // Runs a single Adsgram controller with its own safety timeout so a
+  // hung/no-fill SDK never blocks the chain. Always resolves, never rejects.
+  function runAd(controller, label) {
+    return new Promise((resolve) => {
+      if (!controller) { resolve(); return; }
+ 
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(safetyTimer);
+        resolve();
+      };
+ 
+      // Safety net: if the ad SDK hangs (slow load, no fill, network hiccup),
+      // never leave the user stuck on "Loading...". Fall through and continue.
+      const safetyTimer = setTimeout(() => {
+        console.warn(`Adsgram (${label}): no response in time, skipping`);
+        finish();
+      }, 8000);
+ 
+      controller.show().then(finish).catch((result) => {
+        console.warn(`Adsgram (${label}): ad not completed`, result);
+        finish();
+      });
+    });
+  }
+ 
   els.watchBtn.addEventListener("click", () => {
     els.watchBtn.disabled = true;
     els.watchBtnLabel.textContent = "Loading...";
  
-    let proceeded = false;
-    const proceed = () => {
-      if (proceeded) return;
-      proceeded = true;
-      clearTimeout(safetyTimer);
-      els.previewOverlay.style.display = "none";
-      openPlayer();
-    };
- 
-    // Safety net: if the ad SDK hangs (slow load, no fill, network hiccup),
-    // never leave the user stuck on "Loading...". Fall through to the video.
-    const safetyTimer = setTimeout(() => {
-      console.warn("Adsgram: no response in time, continuing without ad");
-      proceed();
-    }, 8000);
- 
-    if (AdController) {
-      AdController.show().then(proceed).catch((result) => {
-        console.warn("Adsgram: ad not completed", result);
-        proceed();
+    // Ad 1 → Ad 2 → video. Each ad only starts loading once the previous
+    // one has finished/closed, and either step is skipped cleanly if its
+    // controller is missing, errors, or times out.
+    runAd(AdController1, "block " + ADSGRAM_BLOCK_ID_1)
+      .then(() => runAd(AdController2, "block " + ADSGRAM_BLOCK_ID_2))
+      .then(() => {
+        els.previewOverlay.style.display = "none";
+        openPlayer();
       });
-    } else {
-      proceed();
-    }
   });
  
   /* ── Player open/close ── */
