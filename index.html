@@ -607,7 +607,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const thumbUrl = `${STREAM_SERVER}/thumb?msg=${msgId}`;
-    els.thumbImg.onload  = () => { els.th    els.thumbImg.onload  = () => { els.thumbImg.hidden = false; els.thumbFallback.style.display = "none"; };
+    els.thumbImg.onload  = () => { els.thumbImg.onload  = () => { els.thumbImg.hidden = false; els.thumbFallback.style.display = "none"; };
     els.thumbImg.onerror = () => { els.thumbImg.hidden = true;  els.thumbFallback.style.display = "flex"; };
     els.thumbImg.src = thumbUrl;
   }
